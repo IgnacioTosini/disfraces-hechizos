@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="42" x2="1120" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A0D25"/>
+      <stop offset="1" stop-color="#2C163B"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="215" y1="180" x2="390" y2="430" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE45C"/>
+      <stop offset="1" stop-color="#FBCB22"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="matrix(0 340 -340 0 315 315)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#694080" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#694080" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v630H0z"/>
+  <path fill="url(#glow)" d="M0 0h630v630H0z"/>
+  <circle cx="316" cy="315" r="230" stroke="#FBD32C" stroke-opacity=".14"/>
+  <circle cx="316" cy="315" r="202" stroke="#FBD32C" stroke-opacity=".08"/>
+
+  <g stroke="url(#gold)" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke-width="9" d="M272 178c-29-24-16-49 6-64 20-14 24-34 6-49m52 111c-9-25 7-38 25-51 19-14 19-31 7-46m-124 90c-13-18-4-33 12-44"/>
+    <path stroke-width="7" d="m382 135 7 17 18 2-14 11 4 18-15-10-15 10 5-18-14-11 18-2 6-17Z"/>
+    <path stroke-width="12" d="M214 221c-34 3-51 22-46 48 4 21 19 33 42 34m212-82c34 3 51 22 46 48-4 21-19 33-42 34"/>
+    <path stroke-width="13" d="M196 233h224l-16 119c-5 39-42 66-96 66s-91-27-96-66l-16-119Z" fill="#FBCB22" fill-opacity=".13"/>
+    <path stroke-width="14" d="M185 226c0-10 8-18 18-18h190c10 0 18 8 18 18v8H185v-8Z" fill="url(#gold)"/>
+    <path stroke-width="12" d="m232 414-14 25m157-25 14 25"/>
+    <path stroke-width="9" d="M244 267c20 23 24 44 4 64m46-73c-15 20-15 36 0 50m47-47c-23 24-24 48-3 68"/>
+  </g>
+  <path d="m266 293 7 16 18 2-14 11 4 18-15-10-15 10 5-18-14-11 18-2 6-16Z" fill="#35183D"/>
+  <circle cx="350" cy="279" r="6" fill="#FFF0A0"/>
+  <circle cx="373" cy="306" r="4" fill="#FFF0A0"/>
+  <circle cx="335" cy="328" r="4" fill="#FFF0A0"/>
+  <path d="m155 174 6 14 15 2-12 9 3 15-12-8-13 8 4-15-12-9 15-2 6-14Zm331 241 5 12 13 2-10 8 3 13-11-7-11 7 4-13-10-8 13-2 4-12Z" fill="#FBD32C"/>
+
+  <path d="M520 246h.5" stroke="#FBD32C" stroke-width="3"/>
+  <text x="550" y="252" fill="#FBD32C" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" letter-spacing="8">DISFRACES</text>
+  <text x="542" y="365" fill="#FFF8E8" font-family="Georgia, 'Times New Roman', serif" font-size="105" font-style="italic" font-weight="700" letter-spacing="-4">Hechizos</text>
+  <path d="M552 397h487" stroke="#FBD32C" stroke-opacity=".48"/>
+  <text x="552" y="443" fill="#E6DDEB" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="500" letter-spacing="3">ALQUILER DE DISFRACES</text>
+  <text x="552" y="481" fill="#C9BBD2" font-family="Arial, Helvetica, sans-serif" font-size="19" letter-spacing="1.5">MAR DEL PLATA · ARGENTINA</text>
+
+  <path d="M1074 181v40m-20-20h40m-34-14 28 28m0-28-28 28" stroke="#FBD32C" stroke-linecap="round" stroke-width="3" opacity=".8"/>
+  <circle cx="1080" cy="424" r="3" fill="#FBD32C" opacity=".65"/>
+  <circle cx="1110" cy="396" r="2" fill="#FFF8E8" opacity=".65"/>
+</svg>
