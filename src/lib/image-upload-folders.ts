@@ -1,5 +1,6 @@
 export const IMAGE_UPLOAD_FOLDERS = [
-  "home",
+  "contenido-inicio",
+  "ocasiones",
   "banners",
   "productos",
   "categorias",

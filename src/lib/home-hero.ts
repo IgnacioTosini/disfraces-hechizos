@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { defaultOccasionAccess, readOccasionAccess, type OccasionAccess } from "@/lib/occasion-access";
 
 export type HomeHeroContent = {
   id: string;
@@ -17,6 +18,7 @@ export type HomeHeroContent = {
 };
 
 export type HomePageCopy = {
+  occasionAccess: OccasionAccess;
   bannerText: string;
   categoriesTitle: string;
   categoriesDescription: string;
@@ -48,6 +50,7 @@ export type HomePageCopy = {
 };
 
 export const DEFAULT_HOME_PAGE_COPY: HomePageCopy = {
+  occasionAccess: defaultOccasionAccess.map((card) => ({ ...card, tags: [...card.tags] })),
   bannerText: "Encontrá tu próximo personaje. Reservá tu disfraz con anticipación.",
   categoriesTitle: "¿Para quién es el disfraz?",
   categoriesDescription: "Elegí un punto de partida y te mostramos el catálogo filtrado.",
@@ -116,7 +119,7 @@ export async function getHomeHeroContent(): Promise<HomeHeroContent> {
     const storedSections = rawSections && typeof rawSections === "object" && !Array.isArray(rawSections)
       ? rawSections as Partial<HomePageCopy>
       : {};
-    return { ...content, sections: { ...DEFAULT_HOME_PAGE_COPY, ...storedSections } };
+    return { ...content, sections: { ...DEFAULT_HOME_PAGE_COPY, ...storedSections, occasionAccess: readOccasionAccess(storedSections.occasionAccess) } };
   } catch (error) {
     console.error("[store] No se pudo cargar el contenido del hero", error);
     return DEFAULT_HOME_HERO;

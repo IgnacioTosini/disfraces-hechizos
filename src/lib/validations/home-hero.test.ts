@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { readHomeHeroFormData } from "./home-hero";
+import { defaultOccasionAccess } from "../occasion-access";
 
 const sections = {
+  occasionAccess: defaultOccasionAccess.map((card) => ({ ...card, tags: [...card.tags] })),
   bannerText: "Encontrá tu próximo personaje.",
   categoriesTitle: "¿Para quién es el disfraz?",
   categoriesDescription: "Elegí un punto de partida.",

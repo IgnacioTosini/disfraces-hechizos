@@ -9,6 +9,7 @@ export type StoreCatalogCostume = {
   rentalPrice: number;
   isFeatured: boolean;
   isActive: boolean;
+  assistantTags: string[];
   categoryId: string;
   category: { id: string; name: string; slug: string; description: string | null; imageUrl: string | null; isActive: boolean; sortOrder: number };
   images: { id: string; url: string; publicId: string | null; altText: string; sortOrder: number; costumeId: string }[];

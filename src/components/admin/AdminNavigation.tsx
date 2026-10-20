@@ -7,8 +7,10 @@ import { useState } from "react";
 const links = [
   { href: "/admin", label: "Resumen" },
   { href: "/admin/inicio", label: "Contenido del inicio" },
+  { href: "/admin/ocasiones", label: "Accesos por ocasión" },
   { href: "/admin/categorias", label: "Categorías" },
   { href: "/admin/disfraces", label: "Disfraces" },
+  { href: "/admin/asistente", label: "Asistente de búsqueda" },
   { href: "/admin/solicitudes", label: "Solicitudes" },
   { href: "/admin/clientes", label: "Clientes" },
 ];

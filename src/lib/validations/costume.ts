@@ -28,12 +28,18 @@ export const costumeFormSchema = z.object({
     z.string().regex(/^(?:0|[1-9]\d{0,7})(?:\.\d{1,2})?$/, "Ingresá un precio válido, con hasta 2 decimales."),
   ]).transform((value) => value === "" ? null : Number(value)),
   categoryId: z.string().min(8, "Elegí una categoría."),
+  assistantTags: z.array(z.string().min(2).max(40).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)).max(12),
   isFeatured: z.boolean(),
   isActive: z.boolean(),
   variants: z.array(variantSchema).min(1, "Agregá al menos un talle.").max(30, "Podés cargar hasta 30 talles."),
   images: z.array(imageSchema).max(8, "Podés cargar hasta 8 imágenes."),
 }).superRefine((data, context) => {
   const sizes = new Set<string>();
+  const tags = new Set<string>();
+  data.assistantTags.forEach((tag, index) => {
+    if (tags.has(tag)) context.addIssue({ code: "custom", path: ["assistantTags", index], message: "No repitas una etiqueta." });
+    tags.add(tag);
+  });
   data.variants.forEach((variant, index) => {
     const normalized = variant.size.toLocaleLowerCase("es");
     if (sizes.has(normalized)) context.addIssue({ code: "custom", path: ["variants", index, "size"], message: "No repitas el mismo talle." });
@@ -55,8 +61,10 @@ export type CostumeFormValues = z.infer<typeof costumeFormSchema>;
 export function readCostumeFormData(formData: FormData) {
   let variants: unknown = [];
   let images: unknown = [];
+  let assistantTags: unknown = [];
   try { variants = JSON.parse(String(formData.get("variants") ?? "[]")); } catch { variants = null; }
   try { images = JSON.parse(String(formData.get("images") ?? "[]")); } catch { images = null; }
+  try { assistantTags = JSON.parse(String(formData.get("assistantTags") ?? "[]")); } catch { assistantTags = null; }
 
   return costumeFormSchema.safeParse({
     name: formData.get("name"),
@@ -65,6 +73,7 @@ export function readCostumeFormData(formData: FormData) {
     audience: formData.get("audience"),
     rentalPrice: formData.get("rentalPrice") ?? "",
     categoryId: formData.get("categoryId"),
+    assistantTags,
     isFeatured: formData.get("isFeatured") === "on",
     isActive: formData.get("isActive") === "on",
     variants,

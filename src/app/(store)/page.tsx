@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Hero from "@/components/sections/hero/Hero";
 import Categories from "@/components/sections/categories/Categories";
 import FeaturedCostumes from "@/components/sections/featured-costumes/FeaturedCostumes";
+import OccasionAccess from "@/components/sections/occasions/OccasionAccess";
 import HowItWorks from "@/components/sections/how-it-works/HowItWorks";
 import Faq from "@/components/sections/faq/Faq";
 import { getStoreCatalog } from "@/lib/store-catalog";
 import { getHomeHeroContent } from "@/lib/home-hero";
+import { getCostumeFinderOptions } from "@/lib/costume-finder-settings";
 import { getSiteUrl } from "@/lib/site-url";
 
 export const instant = false;
@@ -34,9 +36,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Home() {
-  const [{ costumes, loadError }, heroContent] = await Promise.all([
+  const [{ costumes, loadError }, heroContent, finderOptions] = await Promise.all([
     getStoreCatalog(),
     getHomeHeroContent(),
+    getCostumeFinderOptions(),
   ]);
   const structuredData = {
     "@context": "https://schema.org",
@@ -63,6 +66,7 @@ export default async function Home() {
       />
       <Hero content={heroContent} />
       <Categories content={heroContent.sections} />
+      <OccasionAccess cards={heroContent.sections.occasionAccess} availableTags={finderOptions.map(({ id }) => id)} />
       <FeaturedCostumes costumes={costumes} loadError={loadError} content={heroContent.sections} />
       <HowItWorks content={heroContent.sections} />
       <Faq content={heroContent.sections} />

@@ -189,6 +189,14 @@
     background: #fff9e7;
   }
 
+  &__upcoming {
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.4rem;
+    border: 1px solid #dfd3ef;
+    border-radius: 1rem;
+    background: #f8f3fc;
+  }
+
   &__inspectionHeader {
     display: flex;
     justify-content: space-between;
@@ -227,24 +235,31 @@
     list-style: none;
   }
 
-  &__inspection li {
+  &__inspection li,
+  &__upcoming li {
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 1rem;
     padding: .65rem 0;
     border-top: 1px solid #efe4c4;
   }
 
-  &__inspection li>div {
+  &__inspection li>div,
+  &__upcoming li>div {
     display: grid;
     gap: .2rem;
+    flex: 1 1 14rem;
   }
 
-  &__inspection li strong {
+  &__inspection li strong,
+  &__upcoming li strong {
     font-size: .84rem;
   }
 
-  &__inspection li span {
+  &__inspection li span,
+  &__upcoming li span {
     color: #746c7d;
     font-size: .76rem;
   }
@@ -252,6 +267,22 @@
   &__inspectionDate {
     white-space: nowrap;
   }
+
+  &__inspection li>a,
+  &__upcoming li>a {
+    color: #4b1f7e;
+    font-size: .82rem;
+    font-weight: $font-weight-bold;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  &__inspection li>a:hover,
+  &__upcoming li>a:hover {
+    text-decoration: underline;
+  }
+
+  &__upcoming li { border-color: #e7dcef; }
 
   &__inspection>a {
     color: #4b1f7e;

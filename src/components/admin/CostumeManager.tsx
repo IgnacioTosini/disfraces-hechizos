@@ -13,6 +13,7 @@ import { slugify } from "@/lib/slugify";
 import { ImageService } from "@/services/ImageService";
 import { validateImageFile } from "@/lib/image-upload-validation";
 import { readCostumeFormData } from "@/lib/validations/costume";
+import type { CostumeFinderOption } from "@/lib/costume-finder-settings";
 import {
   createCostume,
   deleteCostume,
@@ -35,6 +36,7 @@ export type AdminCostume = {
   rentalPrice: string | null;
   isFeatured: boolean;
   isActive: boolean;
+  assistantTags: string[];
   categoryId: string;
   category: CostumeCategoryOption;
   images: CostumeImage[];
@@ -47,7 +49,7 @@ type EditorCostume = Omit<AdminCostume, "category">;
 const audienceLabels: Record<Audience, string> = { ADULT: "Adultos", CHILD: "Infantiles", UNISEX: "Unisex" };
 const maximumImages = 8;
 
-export default function CostumeManager({ costumes, categories, loadError }: { costumes: AdminCostume[]; categories: CostumeCategoryOption[]; loadError: boolean }) {
+export default function CostumeManager({ costumes, categories, finderOptions, loadError }: { costumes: AdminCostume[]; categories: CostumeCategoryOption[]; finderOptions: CostumeFinderOption[]; loadError: boolean }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [editing, setEditing] = useState<EditorCostume | null | undefined>(undefined);
@@ -90,7 +92,7 @@ export default function CostumeManager({ costumes, categories, loadError }: { co
   return (
     <section className="costumeAdmin">
       <header className="costumeAdmin__header">
-        <div><p className="adminDashboard__eyebrow">CATÁLOGO</p><h1>Disfraces</h1><p>Gestioná fichas, talles e imágenes desde un solo lugar.</p></div>
+        <div><p className="adminDashboard__eyebrow">CATÁLOGO</p><h1>Disfraces</h1><p>Gestioná fichas, talles e imágenes desde un solo lugar. <Link href="/admin/asistente">Configurar etiquetas del asistente →</Link></p></div>
         <button className="categoryAdmin__primary" type="button" disabled={!categories.some((category) => category.isActive)} onClick={() => { setNotice(""); setEditing(null); }}>＋ <span>Nuevo disfraz</span></button>
       </header>
 
@@ -112,11 +114,13 @@ export default function CostumeManager({ costumes, categories, loadError }: { co
         {filteredCostumes.length ? <div className="costumeAdmin__list">
           {costumePagination.pageItems.map((costume) => {
             const hasRentalHistory = costume.variants.some((variant) => (variant.rentalItemsCount ?? 0) > 0);
+            const assistantLabels = costume.assistantTags.map((tag) => finderOptions.find((option) => option.id === tag)?.label).filter((label): label is string => Boolean(label));
             return <article className={`costumeAdmin__row${!costume.isActive ? " costumeAdmin__row--inactive" : ""}`} key={costume.id}>
               <div className="costumeAdmin__photo" aria-hidden="true">{costume.images[0] ? <span style={{ backgroundImage: `url(${JSON.stringify(costume.images[0].url)})` }} /> : <span>{costume.name.slice(0, 1).toLocaleUpperCase("es")}</span>}</div>
               <div className="costumeAdmin__info">
                 <div className="costumeAdmin__title"><h3>{costume.name}</h3><span className={`categoryAdmin__badge${costume.isActive ? " categoryAdmin__badge--active" : ""}`}>{costume.isActive ? "Publicado" : "Pausado"}</span>{costume.isFeatured && <span className="costumeAdmin__featured">★ Destacado</span>}</div>
                 <p className="costumeAdmin__meta">{costume.category.name} <span>·</span> {audienceLabels[costume.audience]} <span>·</span> {costume.variants.length} {costume.variants.length === 1 ? "talle" : "talles"} <span>·</span> {costume.images.length} {costume.images.length === 1 ? "imagen" : "imágenes"}</p>
+                {assistantLabels.length > 0 && <p className="costumeAdmin__assistantTags">Asistente: {assistantLabels.join(" · ")}</p>}
                 {hasRentalHistory && <p className="costumeAdmin__historyNotice">Tiene solicitudes vinculadas; pausalo para conservar el historial.</p>}
                 <p className="costumeAdmin__slug">/{costume.slug}</p>
               </div>
@@ -132,20 +136,22 @@ export default function CostumeManager({ costumes, categories, loadError }: { co
         {filteredCostumes.length > 0 && <Pagination page={costumePagination.page} pageCount={costumePagination.pageCount} onPageChange={costumePagination.setPage} itemCount={filteredCostumes.length} pageSize={8} itemLabel="disfraces" />}
       </div>
 
-      {editing !== undefined && <CostumeEditor key={editing?.id ?? "new-costume"} costume={editing} categories={categories} busy={isPending} onClose={() => setEditing(undefined)} onSave={(result) => { if (result.success) showResult(result); }} />}
+      {editing !== undefined && <CostumeEditor key={editing?.id ?? "new-costume"} costume={editing} categories={categories} finderOptions={finderOptions} busy={isPending} onClose={() => setEditing(undefined)} onSave={(result) => { if (result.success) showResult(result); }} />}
     </section>
   );
 }
 
-function CostumeEditor({ costume, categories, busy, onClose, onSave }: {
+function CostumeEditor({ costume, categories, finderOptions, busy, onClose, onSave }: {
   costume: EditorCostume | null;
   categories: CostumeCategoryOption[];
+  finderOptions: CostumeFinderOption[];
   busy: boolean;
   onClose: () => void;
   onSave: (result: CostumeActionResult) => void;
 }) {
   const [name, setName] = useState(costume?.name ?? "");
   const [slug, setSlug] = useState(costume?.slug ?? "");
+  const [assistantTags, setAssistantTags] = useState<string[]>(costume?.assistantTags ?? []);
   const [slugTouched, setSlugTouched] = useState(Boolean(costume));
   const [variants, setVariants] = useState<CostumeVariant[]>(costume?.variants.map(({ id, size, stockQuantity, isActive, rentalItemsCount }) => ({ id, size, stockQuantity, isActive, rentalItemsCount })) ?? []);
   const [existingImages, setExistingImages] = useState<CostumeImage[]>(costume?.images ?? []);
@@ -207,6 +213,7 @@ function CostumeEditor({ costume, categories, busy, onClose, onSave }: {
     const formData = new FormData(event.currentTarget);
     formData.set("variants", JSON.stringify(variants.map(({ id, size, stockQuantity, isActive }) => ({ id, size, stockQuantity, isActive }))));
     formData.set("images", JSON.stringify(existingImages.map((image, index) => ({ url: image.url, publicId: image.publicId, altText: image.altText ?? "", sortOrder: index }))));
+    formData.set("assistantTags", JSON.stringify(assistantTags));
     const validation = readCostumeFormData(formData);
     if (!validation.success) {
       const errors: Record<string, string> = {};
@@ -264,6 +271,7 @@ function CostumeEditor({ costume, categories, busy, onClose, onSave }: {
               <label className="categoryEditor__field costumeEditor__description"><span>Descripción <em>Opcional</em></span><textarea name="description" defaultValue={costume?.description ?? ""} maxLength={1200} rows={3} placeholder="Contá qué incluye o qué lo hace especial…" /></label>
               <label className="categoryEditor__field"><span>Precio orientativo <em>Opcional</em></span><div className="costumeEditor__priceInput"><span>$</span><input name="rentalPrice" type="number" min="0" max="99999999.99" step="0.01" defaultValue={costume?.rentalPrice ?? ""} placeholder="18000" /></div><small>En pesos argentinos. Se confirma con el local.</small></label>
             </div>
+            <fieldset className="costumeEditor__assistantTags"><legend>Etiquetas del asistente</legend><p>Elegí los estilos que describen este disfraz. Se usan para recomendarlo en el buscador guiado.</p><div>{finderOptions.map((option) => <label key={option.id}><input type="checkbox" checked={assistantTags.includes(option.id)} onChange={(event) => setAssistantTags((current) => event.target.checked ? [...current, option.id] : current.filter((id) => id !== option.id))} /><span>{option.label}</span></label>)}</div>{fieldErrors.assistantTags && <small className="costumeEditor__error">{fieldErrors.assistantTags}</small>}</fieldset>
             <div className="costumeEditor__toggles"><label><input type="checkbox" name="isActive" defaultChecked={costume?.isActive ?? true} /><span><strong>Visible en el catálogo</strong><small>Podés pausarlo sin perder sus datos.</small></span></label><label><input type="checkbox" name="isFeatured" defaultChecked={costume?.isFeatured ?? false} /><span><strong>Marcar como destacado</strong><small>Señala los disfraces que querés priorizar.</small></span></label></div>
           </section>
 

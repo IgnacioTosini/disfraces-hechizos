@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { isAdminAuthenticated } from "@/lib/admin-session";
 import { prisma } from "@/lib/prisma";
+import { getCostumeFinderOptions } from "@/lib/costume-finder-settings";
 import { readCostumeFormData, type CostumeFormValues } from "@/lib/validations/costume";
 
 export type CostumeActionResult = {
@@ -52,6 +53,12 @@ function refreshCostumeViews() {
   revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath("/catalogo");
+  revalidatePath("/admin/asistente");
+}
+
+async function validateAssistantTags(tags: string[]) {
+  const options = await getCostumeFinderOptions();
+  return tags.every((tag) => options.some((option) => option.id === tag));
 }
 
 function toVariantData(variant: CostumeFormValues["variants"][number]) {
@@ -67,6 +74,7 @@ export async function createCostume(formData: FormData): Promise<CostumeActionRe
   if (denied) return denied;
   const parsed = readCostumeFormData(formData);
   if (!parsed.success) return validationErrors(parsed.error.issues);
+  if (!(await validateAssistantTags(parsed.data.assistantTags))) return { success: false, fieldErrors: { assistantTags: "Actualizá las etiquetas del asistente e intentá de nuevo." }, message: "Una etiqueta del asistente ya no está disponible." };
   const imageError = validateImageOwnership(parsed.data);
   if (imageError) return { success: false, message: imageError };
 
@@ -83,6 +91,7 @@ export async function createCostume(formData: FormData): Promise<CostumeActionRe
         rentalPrice: parsed.data.rentalPrice === null ? null : new Prisma.Decimal(parsed.data.rentalPrice),
         isFeatured: parsed.data.isFeatured,
         isActive: parsed.data.isActive,
+        assistantTags: parsed.data.assistantTags,
         categoryId: parsed.data.categoryId,
         variants: { create: parsed.data.variants.map(toVariantData) },
         images: { create: parsed.data.images.map(toImageData) },
@@ -102,6 +111,7 @@ export async function updateCostume(id: string, formData: FormData): Promise<Cos
   if (!isValidId(id)) return { success: false, message: "El disfraz indicado no es válido." };
   const parsed = readCostumeFormData(formData);
   if (!parsed.success) return validationErrors(parsed.error.issues);
+  if (!(await validateAssistantTags(parsed.data.assistantTags))) return { success: false, fieldErrors: { assistantTags: "Actualizá las etiquetas del asistente e intentá de nuevo." }, message: "Una etiqueta del asistente ya no está disponible." };
 
   try {
     const current = await prisma.costume.findUnique({
@@ -141,6 +151,7 @@ export async function updateCostume(id: string, formData: FormData): Promise<Cos
           rentalPrice: parsed.data.rentalPrice === null ? null : new Prisma.Decimal(parsed.data.rentalPrice),
           isFeatured: parsed.data.isFeatured,
           isActive: parsed.data.isActive,
+          assistantTags: parsed.data.assistantTags,
           categoryId: parsed.data.categoryId,
         },
       });

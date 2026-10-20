@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { isAdminAuthenticated } from "@/lib/admin-session";
-import { DEFAULT_HOME_HERO } from "@/lib/home-hero";
+import { DEFAULT_HOME_HERO, getHomeHeroContent } from "@/lib/home-hero";
+import { getCostumeFinderOptions } from "@/lib/costume-finder-settings";
 import { upsertHomeHeroRow } from "@/lib/persist-home-hero";
 import { prisma } from "@/lib/prisma";
 import { readHomeHeroFormData, type HomeHeroFormValues } from "@/lib/validations/home-hero";
@@ -29,12 +30,34 @@ function isSafeLocalImagePath(url: string) {
 
 function isHomeImagePublicId(publicId: string) {
   const root = (process.env.CLOUDINARY_UPLOAD_FOLDER ?? "demo-store").replace(/\/+$/, "");
+  const prefix = `${root}/contenido-inicio/`;
+  const filename = publicId.slice(prefix.length);
+  return publicId.startsWith(prefix) && Boolean(filename) && !filename.includes("/") && !publicId.split("/").some((part) => part === "." || part === "..");
+}
+
+function isLegacyHomeImagePublicId(publicId: string) {
+  const root = (process.env.CLOUDINARY_UPLOAD_FOLDER ?? "demo-store").replace(/\/+$/, "");
   return publicId.startsWith(`${root}/home/`) && !publicId.split("/").some((part) => part === "." || part === "..");
 }
 
-function validateImageOwnership(values: HomeHeroFormValues, currentImageUrl: string) {
+function isOccasionImagePublicId(publicId: string) {
+  const root = (process.env.CLOUDINARY_UPLOAD_FOLDER ?? "demo-store").replace(/\/+$/, "");
+  const prefix = `${root}/ocasiones/`;
+  const filename = publicId.slice(prefix.length);
+  return publicId.startsWith(prefix) && Boolean(filename) && !filename.includes("/") && !publicId.split("/").some((part) => part === "." || part === "..");
+}
+
+function isLegacyOccasionImagePublicId(publicId: string) {
+  const root = (process.env.CLOUDINARY_UPLOAD_FOLDER ?? "demo-store").replace(/\/+$/, "");
+  const legacyPrefix = `${root}/ocasiones/`;
+  const remaining = publicId.slice(legacyPrefix.length);
+  return publicId.startsWith(legacyPrefix) && !remaining.includes("/") && Boolean(remaining) && !publicId.split("/").some((part) => part === "." || part === "..");
+}
+
+function validateImageOwnership(values: HomeHeroFormValues, currentImageUrl: string, currentImagePublicId: string | null) {
   if (values.imagePublicId) {
-    if (!values.imageUrl.startsWith("https://res.cloudinary.com/") || !isHomeImagePublicId(values.imagePublicId)) {
+    const isCurrentLegacyImage = values.imagePublicId === currentImagePublicId && isLegacyHomeImagePublicId(values.imagePublicId);
+    if (!values.imageUrl.startsWith("https://res.cloudinary.com/") || (!isHomeImagePublicId(values.imagePublicId) && !isCurrentLegacyImage)) {
       return "La imagen debe estar alojada en la carpeta del inicio de Cloudinary.";
     }
     return null;
@@ -55,8 +78,21 @@ export async function saveHomeHeroContent(formData: FormData): Promise<HomeHeroA
   try {
     const current = await prisma.homeHero.findUnique({ where: { id: "home" } });
     const currentImageUrl = current?.imageUrl ?? DEFAULT_HOME_HERO.imageUrl;
-    const imageError = validateImageOwnership(parsed.data, currentImageUrl);
+    const imageError = validateImageOwnership(parsed.data, currentImageUrl, current?.imagePublicId ?? null);
     if (imageError) return { success: false, message: imageError };
+
+    const [currentContent, finderOptions] = await Promise.all([getHomeHeroContent(), getCostumeFinderOptions()]);
+    const validTags = new Set(finderOptions.map(({ id }) => id));
+    for (const card of parsed.data.sections.occasionAccess) {
+      if (!card.tags.every((tag) => validTags.has(tag))) return { success: false, message: `Actualizá las etiquetas de “${card.title}” en Accesos por ocasión.` };
+      const previous = currentContent.sections.occasionAccess.find(({ id }) => id === card.id);
+      if (card.imagePublicId) {
+        const isCurrentLegacyImage = previous?.imagePublicId === card.imagePublicId && isLegacyOccasionImagePublicId(card.imagePublicId);
+        if (!card.imageUrl.startsWith("https://res.cloudinary.com/") || (!isOccasionImagePublicId(card.imagePublicId) && !isCurrentLegacyImage)) return { success: false, message: `La imagen de “${card.title}” no pertenece a la carpeta de ocasiones de Cloudinary.` };
+      } else if (!previous || card.imageUrl !== previous.imageUrl || !isSafeLocalImagePath(card.imageUrl)) {
+        return { success: false, message: `Seleccioná una imagen de Cloudinary para “${card.title}” desde Accesos por ocasión.` };
+      }
+    }
 
     // This parameterized upsert supports a dev server with an older Prisma model cached in memory.
     const imagePublicId = parsed.data.imagePublicId;

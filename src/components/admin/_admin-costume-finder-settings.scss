@@ -1,0 +1,45 @@
+@use '@/styles/variables' as *;
+
+.finderSettings { max-width: 74rem; }
+.finderSettings__header { margin-bottom: 1.5rem; }
+.finderSettings__header h1 { margin: 0; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.04em; }
+.finderSettings__header p:last-child { margin: .5rem 0 0; color: #736b7a; }
+.finderSettings__intro { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .8rem; margin-bottom: 1rem; padding: .9rem 1rem; border: 1px solid #efd988; border-radius: .85rem; background: #fff8dd; }
+.finderSettings__intro strong { color: #42205f; font-size: .88rem; }
+.finderSettings__intro span { color: #74677d; font-size: .83rem; }
+.finderSettings__panel { overflow: hidden; border: 1px solid #e9e2ef; border-radius: 1rem; background: #fff; box-shadow: 0 .8rem 2rem #24153108; }
+.finderSettings__panelHeader { display: flex; justify-content: space-between; gap: 1rem; padding: 1.25rem 1.4rem; border-bottom: 1px solid #eee9f2; background: linear-gradient(110deg, #fff, #fbf8fd); }
+.finderSettings__panelHeader h2 { margin: 0; font-size: 1.05rem; }
+.finderSettings__panelHeader p { margin: .35rem 0 0; color: #82798a; font-size: .82rem; line-height: 1.5; }
+.finderSettings__panelHeader > span { flex: 0 0 auto; color: #7c7085; font-size: .8rem; }
+.finderSettings__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem; padding: 1rem; background: #fbf9fc; }
+.finderSettings__option { display: grid; gap: .75rem; min-width: 0; padding: 1rem; border: 1px solid #ece5f0; border-radius: .85rem; background: white; }
+.finderSettings__optionTitle { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+.finderSettings__optionTitle span { color: #5e3180; font-size: .68rem; font-weight: 800; letter-spacing: .12em; }
+.finderSettings__optionTitle code { color: #92879a; font-size: .7rem; }
+.finderSettings__option label, .finderSettings__add label { display: grid; gap: .35rem; color: #62566c; font-size: .78rem; font-weight: 700; }
+.finderSettings__option label small { color: #948a9b; font-weight: 400; }
+.finderSettings__option input, .finderSettings__option textarea, .finderSettings__add input { width: 100%; min-width: 0; border: 1px solid #e1d7e8; border-radius: .65rem; padding: .65rem .75rem; background: #fff; color: #24172f; font: inherit; font-size: .88rem; }
+.finderSettings__option textarea { resize: vertical; line-height: 1.5; }
+.finderSettings__option input:focus-visible, .finderSettings__option textarea:focus-visible, .finderSettings__add input:focus-visible { outline: 2px solid #6b3597; outline-offset: 2px; }
+.finderSettings__optionFooter { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding-top: .3rem; }
+.finderSettings__optionFooter small { color: #82798a; font-size: .72rem; }
+.finderSettings__remove { border: 0; padding: .4rem .6rem; border-radius: .5rem; background: #fff1ef; color: #9b3933; font: inherit; font-size: .75rem; font-weight: 700; cursor: pointer; }
+.finderSettings__remove:disabled { opacity: .45; cursor: not-allowed; }
+.finderSettings__add { display: flex; align-items: end; gap: .65rem; padding: 1rem 1.4rem; border-top: 1px solid #eee9f2; }
+.finderSettings__add label { flex: 1; }
+.finderSettings__add button { min-height: 2.6rem; padding: .6rem .9rem; border: 1px solid #d9c9e5; border-radius: 999px; background: #fff; color: #4e2474; font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
+.finderSettings__add button:disabled { opacity: .45; cursor: not-allowed; }
+.finderSettings__footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.4rem; border-top: 1px solid #eee9f2; }
+.finderSettings__footer p { margin: 0; color: #82798a; font-size: .8rem; }
+
+@media (max-width: 48rem) {
+  .finderSettings__list { grid-template-columns: 1fr; padding: .75rem; }
+  .finderSettings__panelHeader, .finderSettings__footer { padding: 1rem; }
+  .finderSettings__add { padding: 1rem; }
+}
+
+@media (max-width: 34rem) {
+  .finderSettings__add, .finderSettings__footer { align-items: stretch; flex-direction: column; }
+  .finderSettings__footer .categoryAdmin__primary { width: 100%; }
+}

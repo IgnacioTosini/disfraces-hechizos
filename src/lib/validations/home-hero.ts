@@ -1,6 +1,8 @@
 import { z } from "zod";
+import { occasionAccessSchema } from "../occasion-access";
 
 const homePageCopySchema = z.object({
+  occasionAccess: occasionAccessSchema,
   bannerText: z.string().trim().min(2).max(120),
   categoriesTitle: z.string().trim().min(2).max(100),
   categoriesDescription: z.string().trim().min(2).max(180),

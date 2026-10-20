@@ -9,6 +9,7 @@ function costumeForm(variants = [{ size: "M", stockQuantity: 2, isActive: true }
   data.set("audience", "ADULT");
   data.set("rentalPrice", "18000");
   data.set("categoryId", "category-123");
+  data.set("assistantTags", JSON.stringify(["profesiones"]));
   data.set("isFeatured", "on");
   data.set("isActive", "on");
   data.set("variants", JSON.stringify(variants));
@@ -24,6 +25,7 @@ describe("ABM de disfraces", () => {
       expect(result.data.rentalPrice).toBe(18000);
       expect(result.data.variants[0].stockQuantity).toBe(2);
       expect(result.data.images).toEqual([]);
+      expect(result.data.assistantTags).toEqual(["profesiones"]);
     }
   });
 
@@ -52,5 +54,14 @@ describe("ABM de disfraces", () => {
     data.set("variants", "[");
     data.set("images", "[");
     expect(readCostumeFormData(data).success).toBe(false);
+  });
+
+  it("rechaza etiquetas repetidas o con formato incorrecto", () => {
+    const repeated = costumeForm();
+    repeated.set("assistantTags", JSON.stringify(["terror", "terror"]));
+    expect(readCostumeFormData(repeated).success).toBe(false);
+    const invalid = costumeForm();
+    invalid.set("assistantTags", JSON.stringify(["Terror !!!"]));
+    expect(readCostumeFormData(invalid).success).toBe(false);
   });
 });

@@ -9,12 +9,13 @@ import { usePaginatedItems } from "@/components/ui/pagination/usePaginatedItems"
 import { formatARS } from "@/lib/formatters";
 import { readRentalRequestFormData } from "@/lib/validations/rental-request";
 import { buildRequestStatusWhatsAppUrl } from "@/lib/whatsapp-request-status";
-import { createRentalRequest, markRentalItemsAvailableAgain, updateRentalRequestStatus, type RentalRequestActionResult } from "@/app/admin/solicitudes/actions";
+import { createRentalRequest, markAvailabilityAlertContacted, markRentalItemsAvailableAgain, updateRentalRequestStatus, type RentalRequestActionResult } from "@/app/admin/solicitudes/actions";
 
 type RequestStatus = "PENDING" | "CONTACTED" | "CONFIRMED" | "PICKED_UP" | "RETURNED" | "CANCELLED";
 type RequestItem = { id: string; costumeName: string; size: string; quantity: number; unitPrice: string | null; pickupDate: Date; returnDate: Date; isAvailableAgain: boolean };
 export type AdminRentalRequest = { id: string; pickupDate: Date; returnDate: Date; status: RequestStatus; notes: string | null; createdAt: Date; customer: { id: string; name: string; phone: string; email: string | null }; items: RequestItem[] };
 export type RentalVariantOption = { id: string; size: string; rentalPrice: string | null; costume: { id: string; name: string; rentalPrice: string | null } };
+type AvailabilityAlertRow = { id: string; fromDate: Date; throughDate: Date; contactedAt: Date | null; customerName: string; customerPhone: string; customerEmail: string | null; size: string; costumeName: string };
 
 const statuses: { value: RequestStatus; label: string }[] = [
   { value: "PENDING", label: "Pendiente" }, { value: "CONTACTED", label: "Contactado" }, { value: "CONFIRMED", label: "Confirmado" },
@@ -22,7 +23,7 @@ const statuses: { value: RequestStatus; label: string }[] = [
 ];
 const dateFormat = new Intl.DateTimeFormat("es-AR", { dateStyle: "medium", timeZone: "UTC" });
 
-export default function RentalRequestManager({ requests, variants, loadError }: { requests: AdminRentalRequest[]; variants: RentalVariantOption[]; loadError: boolean }) {
+export default function RentalRequestManager({ requests, variants, alerts, loadError }: { requests: AdminRentalRequest[]; variants: RentalVariantOption[]; alerts: AvailabilityAlertRow[]; loadError: boolean }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
@@ -36,6 +37,7 @@ export default function RentalRequestManager({ requests, variants, loadError }: 
   const requestPagination = usePaginatedItems(filtered, 8, query);
   const pendingCount = requests.filter(({ status }) => status === "PENDING").length;
   const confirmedCount = requests.filter(({ status }) => status === "CONFIRMED" || status === "PICKED_UP").length;
+  const openAlerts = alerts.filter(({ contactedAt }) => !contactedAt);
 
   useEffect(() => {
     const refreshRequests = () => {
@@ -59,6 +61,15 @@ export default function RentalRequestManager({ requests, variants, loadError }: 
     startTransition(async () => showResult(await markRentalItemsAvailableAgain(id)));
   }
 
+  function markAlertContacted(id: string) {
+    startTransition(async () => showResult(await markAvailabilityAlertContacted(id)));
+  }
+
+  function alertWhatsAppUrl(alert: AvailabilityAlertRow) {
+    const text = `Hola ${alert.customerName}, te contactamos por tu aviso de disponibilidad para ${alert.costumeName} talle ${alert.size}, del ${dateFormat.format(alert.fromDate)} al ${dateFormat.format(alert.throughDate)}. Tenemos novedades para vos.`;
+    return `https://wa.me/${alert.customerPhone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
+  }
+
   return <section className="rentalAdmin">
     <header className="rentalAdmin__header"><div><p className="adminDashboard__eyebrow">ALQUILERES</p><h1>Solicitudes</h1><p>Registrá consultas y seguí cada alquiler hasta la devolución.</p></div><button className="categoryAdmin__primary" type="button" disabled={!variants.length} onClick={() => { setNotice(""); setCreating(true); }}>＋ <span>Nueva solicitud</span></button></header>
     <AdminToast message={notice} isError={noticeError} onDismiss={() => setNotice("")} />
@@ -66,9 +77,17 @@ export default function RentalRequestManager({ requests, variants, loadError }: 
     {!variants.length && !loadError && <div className="costumeAdmin__hint">No hay talles activos para incluir. Activá un talle desde <a href="/admin/disfraces">Disfraces</a> para registrar solicitudes.</div>}
 
     <div className="rentalAdmin__summary"><article><span>Total</span><strong>{requests.length}</strong></article><article><span>Pendientes</span><strong>{pendingCount}</strong></article><article><span>Confirmadas o retiradas</span><strong>{confirmedCount}</strong></article></div>
+    <section className="availabilityAlerts" aria-labelledby="availabilityAlertsTitle">
+      <header><div><p className="adminDashboard__eyebrow">SEGUIMIENTO</p><h2 id="availabilityAlertsTitle">Avisos de disponibilidad</h2><p>{openAlerts.length ? `${openAlerts.length} clientes esperan novedades` : "No hay avisos pendientes de contacto."}</p></div><span>{openAlerts.length} pendientes</span></header>
+      {alerts.length > 0 && <div className="availabilityAlerts__list">{alerts.map((alert) => <article key={alert.id} className={alert.contactedAt ? "isContacted" : ""}>
+        <div><strong>{alert.customerName}</strong><a href={`tel:${alert.customerPhone}`}>{alert.customerPhone}</a>{alert.customerEmail && <a href={`mailto:${alert.customerEmail}`}>{alert.customerEmail}</a>}</div>
+        <p><b>{alert.costumeName} · {alert.size}</b><span>{dateFormat.format(alert.fromDate)} al {dateFormat.format(alert.throughDate)}</span></p>
+        {alert.contactedAt ? <span className="availabilityAlerts__done">Contactado</span> : <div><a className="rentalAdmin__whatsapp" href={alertWhatsAppUrl(alert)} target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a><button type="button" disabled={pending} onClick={() => markAlertContacted(alert.id)}>Marcar contactado</button></div>}
+      </article>)}</div>}
+    </section>
     <div className="rentalAdmin__panel">
       <div className="rentalAdmin__toolbar"><div><h2>Seguimiento</h2><p>{requests.length === 1 ? "1 solicitud" : `${requests.length} solicitudes`}</p></div><AdminSearch value={query} onChange={setQuery} placeholder="Buscar cliente o disfraz…" label="Buscar solicitudes" /></div>
-      {filtered.length ? <><div className="rentalAdmin__list">{requestPagination.pageItems.map((request) => <article className="rentalAdmin__row" key={request.id}>
+      {filtered.length ? <><div className="rentalAdmin__list">{requestPagination.pageItems.map((request) => <article className="rentalAdmin__row" id={`solicitud-${request.id}`} key={request.id}>
         <div className="rentalAdmin__main"><div className="rentalAdmin__person"><h3>{request.customer.name}</h3><a href={`tel:${request.customer.phone}`}>{request.customer.phone}</a>{request.customer.email && <a href={`mailto:${request.customer.email}`}>{request.customer.email}</a>}</div><div className="rentalAdmin__items">{request.items.map((item) => <span key={item.id}>{item.costumeName} · {item.size}{item.quantity > 1 ? ` ×${item.quantity}` : ""}<small>{dateFormat.format(item.pickupDate)} al {dateFormat.format(item.returnDate)}</small></span>)}</div></div>
         <div className="rentalAdmin__dates"><span>Retiro</span><strong>{dateFormat.format(request.pickupDate)}</strong><span>Devolución</span><strong>{dateFormat.format(request.returnDate)}</strong></div>
         <div className="rentalAdmin__statusActions"><label className="rentalAdmin__status"><span>Estado</span><select disabled={pending} value={request.status} onChange={(event) => changeStatus(request.id, event.target.value)}>{statuses.map((status) => <option key={status.value} value={status.value}>{status.label}</option>)}</select></label><a className="rentalAdmin__whatsapp" href={buildRequestStatusWhatsAppUrl({ phone: request.customer.phone, customerName: request.customer.name, requestId: request.id, status: request.status, items: request.items })} target="_blank" rel="noopener noreferrer" aria-label={`Informar por WhatsApp a ${request.customer.name} sobre el estado ${statuses.find((status) => status.value === request.status)?.label}`}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-11.9 7L4 20l1.5-4.1A8 8 0 1 1 20 11.5Z" /><path d="M9 9c.4 2 2 3.6 4 4" /></svg><span>Avisar por WhatsApp</span></a></div>

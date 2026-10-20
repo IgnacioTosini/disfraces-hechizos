@@ -1,0 +1,39 @@
+@use '@/styles/variables' as *;
+
+.occasionAdmin {
+  width: min(100%, 82rem);
+
+  &__header { margin-bottom: 1.5rem; }
+  &__header h1 { margin: 0; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: -.04em; }
+  &__header p:last-child { margin-top: .5rem; color: #736b7a; line-height: 1.5; }
+  &__notice { padding: .9rem 1rem; border: 1px solid #efd58a; border-radius: .8rem; background: #fff7dd; color: #675016; }
+  &__notice a { color: #4b1f7e; font-weight: 700; }
+  &__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+  &__card { min-width: 0; padding: 1rem; border: 1px solid #e9e2ef; border-radius: 1rem; background: #fff; box-shadow: 0 .5rem 1.5rem #24153308; }
+  &__cardHeading { display: flex; align-items: center; gap: .7rem; margin-bottom: .85rem; }
+  &__cardHeading > span { display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: .65rem; background: #f1e8f8; color: #5b2585; font-size: .75rem; font-weight: 800; }
+  &__cardHeading h2 { margin: 0; font-size: 1rem; }
+  &__cardHeading small { color: #857a8e; font-size: .72rem; }
+  &__image { position: relative; overflow: hidden; aspect-ratio: 16 / 8; margin-bottom: .85rem; border-radius: .75rem; background: #291738; }
+  &__image > img { object-fit: cover; }
+  &__image > label { position: absolute; right: .65rem; bottom: .65rem; display: inline-flex; align-items: center; min-height: 2.3rem; padding: .55rem .8rem; border-radius: 999px; background: #fff; color: #4b1f7e; font-size: .75rem; font-weight: 750; cursor: pointer; }
+  &__image input { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  &__fields { display: grid; gap: .7rem; }
+  &__fields label { display: grid; gap: .35rem; color: #51465d; font-size: .75rem; font-weight: 700; }
+  &__fields input, &__fields textarea { width: 100%; min-width: 0; border: 1px solid #e1d7e8; border-radius: .6rem; padding: .65rem .75rem; background: #fff; color: #24172f; font: inherit; font-size: .85rem; }
+  &__fields textarea { resize: vertical; line-height: 1.45; }
+  &__fields input:focus-visible, &__fields textarea:focus-visible { outline: 2px solid #6b3597; outline-offset: 2px; }
+  &__tags { margin: .9rem 0 0; padding: .8rem; border: 1px solid #eee8f1; border-radius: .7rem; }
+  &__tags legend { padding: 0 .3rem; color: #51465d; font-size: .72rem; font-weight: 750; }
+  &__tags > div { display: flex; flex-wrap: wrap; gap: .45rem; }
+  &__tags label { display: inline-flex; align-items: center; gap: .35rem; padding: .4rem .55rem; border: 1px solid #e4d9eb; border-radius: 999px; color: #4e4358; font-size: .72rem; cursor: pointer; }
+  &__tags input { accent-color: #572284; }
+  &__footer { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; }
+  &__footer p { margin: 0; color: #82798a; font-size: .8rem; line-height: 1.45; }
+
+  @media (max-width: 48rem) {
+    &__grid { grid-template-columns: 1fr; }
+    &__footer { align-items: stretch; flex-direction: column; }
+    &__footer button { width: 100%; }
+  }
+}

@@ -147,3 +147,18 @@ export async function markRentalItemsAvailableAgain(id: string): Promise<RentalR
     return { success: false, message: "No se pudo confirmar la revisión." };
   }
 }
+
+export async function markAvailabilityAlertContacted(id: string): Promise<RentalRequestActionResult> {
+  const denied = await requireAdmin();
+  if (denied) return denied;
+  if (!/^[a-zA-Z0-9_-]{8,128}$/.test(id)) return { success: false, message: "El aviso indicado no es válido." };
+  try {
+    const updated = await prisma.$executeRaw`UPDATE "AvailabilityAlert" SET "contactedAt" = CURRENT_TIMESTAMP, "updatedAt" = CURRENT_TIMESTAMP WHERE "id" = ${id}`;
+    if (!updated) return { success: false, message: "El aviso ya no existe." };
+    refresh();
+    return { success: true, message: "Aviso marcado como contactado." };
+  } catch (error) {
+    console.error("[admin/solicitudes] No se pudo actualizar el aviso", { id, error });
+    return { success: false, message: "No se pudo actualizar el aviso." };
+  }
+}

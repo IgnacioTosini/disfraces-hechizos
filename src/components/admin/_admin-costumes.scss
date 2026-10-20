@@ -663,3 +663,14 @@
   img { object-fit: contain; }
   p { padding: .6rem .25rem 0; color: #eee6f2; font-size: .8rem; text-align: center; }
 }
+
+.costumeEditor__assistantTags { min-width: 0; margin: 1rem 0 0; padding: 1rem; border: 1px solid #e9e2ef; border-radius: .85rem; }
+.costumeEditor__assistantTags legend { padding: 0 .35rem; color: #24172f; font-size: .88rem; font-weight: 750; }
+.costumeEditor__assistantTags > p { margin: 0 0 .8rem; color: #82798a; font-size: .78rem; line-height: 1.5; }
+.costumeEditor__assistantTags > div { display: flex; flex-wrap: wrap; gap: .5rem; }
+.costumeEditor__assistantTags label { display: inline-flex; align-items: center; gap: .4rem; padding: .5rem .7rem; border: 1px solid #e5dbea; border-radius: 999px; color: #473552; background: #fff; font-size: .8rem; cursor: pointer; }
+.costumeEditor__assistantTags input { accent-color: #512080; }
+.costumeEditor__assistantTags label:has(input:checked) { border-color: #6a3692; background: #f4edf8; color: #4b2170; }
+.costumeAdmin__assistantTags { margin: -.15rem 0 .3rem; color: #5f397d; font-size: .78rem; }
+.costumeAdmin__header > div > p:last-child a { margin-left: .25rem; color: #512080; font-weight: 700; text-decoration: none; }
+.costumeAdmin__header > div > p:last-child a:hover { text-decoration: underline; }

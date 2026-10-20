@@ -311,6 +311,9 @@
     align-items: flex-start;
   }
 
+  .availabilityAlerts__list article { grid-template-columns: 1fr; align-items: start; }
+  .availabilityAlerts__list article > div:last-child { flex-wrap: wrap; }
+
   .rentalAdmin__summary {
     gap: .5rem;
   }

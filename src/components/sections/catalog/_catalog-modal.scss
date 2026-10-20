@@ -393,6 +393,11 @@
                         font-weight: $font-weight-bold;
                     }
 
+                    &__day.isUnavailable.isInRange {
+                        border-color: #b42332;
+                        box-shadow: inset 0 -.22rem #b42332;
+                    }
+
                     &__day.isUnavailable {
                         border-color: #f1caca;
                         background: #fff0f0;
@@ -600,6 +605,39 @@
                     color: $color-text-tertiary;
                     font-size: $font-size-small;
                     line-height: 1.65;
+                }
+
+                .costumeQuickQuestion {
+                    display: flex;
+                    align-items: center;
+                    gap: .75rem;
+                    margin-top: .75rem;
+                    padding: .8rem 1rem;
+                    border: 1px solid #e8deef;
+                    border-radius: .85rem;
+                    color: $color-text-tertiary;
+                    background: #fff;
+                    text-decoration: none;
+                    transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+
+                    > span:first-child {
+                        display: grid;
+                        width: 2.15rem;
+                        height: 2.15rem;
+                        flex: 0 0 auto;
+                        place-items: center;
+                        border-radius: 50%;
+                        color: #241238;
+                        background: $tertiary-color;
+                        font-size: 1rem;
+                    }
+
+                    > span:last-child { display: grid; gap: .15rem; }
+                    strong { font-size: $font-size-small; }
+                    small { color: #746b7d; font-size: $font-size-xsmall; }
+
+                    &:hover { transform: translateY(-.08rem); border-color: $color-secondary-button; background: #fcf9fe; }
+                    &:focus-visible { outline: 2px solid $color-secondary-button; outline-offset: 3px; }
                 }
 
                 .costumeModalActions {

@@ -21,6 +21,7 @@ const weekdays = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
 
 export default function RentalDatePicker({
     from, through, reservations, stockQuantity, startDate, endDate, loading, loadError, onStartDate, onEndDate,
+    showAvailabilityLegend = true, availabilityNote = 'Los días ocupados se calculan con las solicitudes confirmadas y los disfraces pendientes de revisión. El local confirma la disponibilidad final.',
 }: {
     from: string
     through: string
@@ -32,10 +33,11 @@ export default function RentalDatePicker({
     loadError: string
     onStartDate: (value: string) => void
     onEndDate: (value: string) => void
+    showAvailabilityLegend?: boolean
+    availabilityNote?: string
 }) {
     const today = new Date().toLocaleDateString('sv-SE', { timeZone: 'America/Argentina/Buenos_Aires' })
     const [visibleMonth, setVisibleMonth] = useState(monthStart(today))
-    const [rangeMessage, setRangeMessage] = useState('')
     const monthDate = new Date(`${visibleMonth}T00:00:00.000Z`)
     const daysInMonth = new Date(Date.UTC(monthDate.getUTCFullYear(), monthDate.getUTCMonth() + 1, 0)).getUTCDate()
     const leadingDays = (monthDate.getUTCDay() + 6) % 7
@@ -58,21 +60,9 @@ export default function RentalDatePicker({
     const nextMonth = shiftDate(visibleMonth, 32).slice(0, 7) + '-01'
 
     function selectDate(date: string) {
-        setRangeMessage('')
         if (!startDate || endDate || date < startDate) {
             onStartDate(date)
             onEndDate('')
-            return
-        }
-        let firstBlocked = false
-        for (const blocked of blockedDays) {
-            if (blocked >= startDate && blocked <= date) {
-                firstBlocked = true
-                break
-            }
-        }
-        if (firstBlocked) {
-            setRangeMessage('El período incluye un día sin unidades disponibles para este talle. Elegí otro rango.')
             return
         }
         onEndDate(date)
@@ -96,16 +86,17 @@ export default function RentalDatePicker({
                 {dates.map((date) => {
                     const isBlocked = blockedDays.has(date)
                     const isPast = date < from
-                    const disabled = isPast || date > through || isBlocked
+                    // Las fechas ocupadas se pueden seleccionar para consultar
+                    // disponibilidad y pedir un aviso; nunca habilitan el alquiler.
+                    const disabled = isPast || date > through
                     const isSelected = date === startDate || date === endDate
                     const isInRange = Boolean(startDate && endDate && date >= startDate && date <= endDate)
                     const label = accessibleDateFormat.format(new Date(`${date}T00:00:00.000Z`))
                     return <button type='button' role='gridcell' key={date} className={`rentalCalendar__day${isPast ? ' isPast' : ''}${isBlocked ? ' isUnavailable' : ''}${isSelected ? ' isSelected' : ''}${isInRange ? ' isInRange' : ''}`} disabled={disabled || loading} aria-label={`${label}${isPast ? ', fecha pasada' : isBlocked ? ', sin disponibilidad' : ''}`} aria-selected={isSelected} title={isPast ? 'Esta fecha ya pasó' : isBlocked ? 'Sin unidades disponibles para este talle' : label} onClick={() => selectDate(date)}>{dayFormat.format(new Date(`${date}T00:00:00.000Z`))}</button>
                 })}
             </div>
-            <div className='rentalCalendar__legend'><span><i /> Disponible</span><span><i className='isUnavailable' /> Sin unidades para este talle</span></div>
-            {rangeMessage && <p className='rentalCalendar__message rentalCalendar__message--error' role='alert'>{rangeMessage}</p>}
-            <p className='rentalCalendar__note'>Los días ocupados se calculan con las solicitudes confirmadas y los disfraces pendientes de revisión. El local confirma la disponibilidad final.</p>
+            {showAvailabilityLegend && <div className='rentalCalendar__legend'><span><i /> Disponible</span><span><i className='isUnavailable' /> Sin unidades para este talle</span></div>}
+            {availabilityNote && <p className='rentalCalendar__note'>{availabilityNote}</p>}
         </>}
     </div>
 }

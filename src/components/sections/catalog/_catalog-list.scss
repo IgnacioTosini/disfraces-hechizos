@@ -146,6 +146,27 @@
             .catalogResults {
                 min-width: 0;
 
+                .catalogOccasionFilter {
+                    display: flex;
+                    flex-wrap: wrap;
+                    align-items: center;
+                    gap: .5rem .8rem;
+                    margin: -.4rem 0 1rem;
+                    color: #5b2585;
+                    font-size: $font-size-small;
+
+                    button {
+                        padding: 0;
+                        border: 0;
+                        background: transparent;
+                        color: #5b2585;
+                        font: inherit;
+                        font-weight: $font-weight-bold;
+                        text-decoration: underline;
+                        cursor: pointer;
+                    }
+                }
+
                 .catalogToolbar {
                     display: flex;
                     align-items: center;

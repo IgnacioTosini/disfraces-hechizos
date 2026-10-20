@@ -68,6 +68,16 @@ model HomeHero {
 }
 
 // ==============================
+// STORE SETTINGS
+// ==============================
+
+model StoreSettings {
+  id                   String   @id @default("store")
+  costumeFinderOptions Json     @default("[]")
+  updatedAt            DateTime @updatedAt
+}
+
+// ==============================
 // COSTUME
 // ==============================
 
@@ -80,8 +90,9 @@ model Costume {
   audience    Audience @default(UNISEX)
   rentalPrice Decimal? @db.Decimal(10, 2)
 
-  isFeatured Boolean @default(false)
-  isActive   Boolean @default(true)
+  isFeatured    Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  assistantTags String[] @default([])
 
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
@@ -126,7 +137,8 @@ model CostumeVariant {
   costumeId String
   costume   Costume @relation(fields: [costumeId], references: [id], onDelete: Cascade)
 
-  rentalItems RentalItem[]
+  rentalItems        RentalItem[]
+  availabilityAlerts AvailabilityAlert[]
 
   @@unique([costumeId, size])
   @@index([size])
@@ -142,12 +154,32 @@ model Customer {
   phone String
   email String?
 
-  rentalRequests RentalRequest[]
+  rentalRequests     RentalRequest[]
+  availabilityAlerts AvailabilityAlert[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([phone])
+}
+
+// Avisos de clientes interesados cuando un talle no tiene disponibilidad.
+// No participan en el cálculo de stock ni reservan unidades.
+model AvailabilityAlert {
+  id          String    @id @default(cuid())
+  fromDate    DateTime  @db.Date
+  throughDate DateTime  @db.Date
+  contactedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  customerId String
+  customer   Customer       @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  variantId  String
+  variant    CostumeVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([contactedAt, createdAt])
+  @@index([variantId, fromDate, throughDate])
 }
 
 // ==============================

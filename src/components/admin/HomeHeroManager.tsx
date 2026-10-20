@@ -14,7 +14,7 @@ import { saveHomeHeroContent, type HomeHeroActionResult } from "@/app/admin/inic
 type HeroFields = Omit<HomeHeroContent, "id" | "updatedAt" | "sections">;
 type HeroFieldName = keyof HeroFields;
 type HeroCopyField = Exclude<HeroFieldName, "imageUrl" | "imagePublicId">;
-type CopyTextKey = Exclude<keyof HomePageCopy, "howSteps" | "faqItems">;
+type CopyTextKey = Exclude<keyof HomePageCopy, "howSteps" | "faqItems" | "occasionAccess">;
 
 export default function HomeHeroManager({ initialContent, costumes }: { initialContent: HomeHeroContent; costumes: StoreCatalogCostume[] }) {
   const router = useRouter();
@@ -84,7 +84,7 @@ export default function HomeHeroManager({ initialContent, costumes }: { initialC
       if (imageFile) {
         setNotice("Optimizando y subiendo la imagen…");
         setNoticeIsError(false);
-        const upload = await ImageService.uploadImage(imageFile, { folder: "home" });
+        const upload = await ImageService.uploadImage(imageFile, { folder: "contenido-inicio" });
         if (!upload.success) {
           setNotice(upload.error);
           setNoticeIsError(true);
