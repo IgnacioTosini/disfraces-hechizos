@@ -11,6 +11,7 @@ import CostumeFinder from './CostumeFinder'
 import type { StoreCatalogCostume } from '@/lib/store-catalog'
 import type { CostumeFinderOption } from '@/lib/costume-finder-settings'
 import { formatARS } from '@/lib/formatters'
+import { formatWhatsAppMessage } from '@/lib/whatsapp-message'
 import { animateCatalogResults } from './Catalog.gsap'
 import './_catalog.scss'
 
@@ -106,12 +107,11 @@ export default function Catalog({ whatsappNumber, costumes: catalogCostumes, fin
     const activeFilterCount = [audience !== 'ALL', categoryId !== 'ALL', size !== 'ALL', selectedTags.length > 0].filter(Boolean).length
     const selectedTagLabels = finderOptions.filter(({ id }) => selectedTags.includes(id)).map(({ label }) => label)
     const directQuestionMessage = selectedCostume
-        ? [
+        ? formatWhatsAppMessage([
             `Hola, quería hacer una consulta sobre el disfraz ${selectedCostume.name}.`,
-            selectedVariantSize ? `Talle de interés: ${selectedVariantSize}.` : '',
-            pickupDate && returnDate ? `Fechas que me interesan: del ${formatDate(pickupDate)} al ${formatDate(returnDate)}.` : '',
+            [selectedVariantSize ? `Talle de interés: ${selectedVariantSize}.` : '', pickupDate && returnDate ? `Fechas que me interesan: del ${formatDate(pickupDate)} al ${formatDate(returnDate)}.` : ''].filter(Boolean).join('\n'),
             '¿Me pueden ayudar?',
-        ].filter(Boolean).join('\n')
+        ])
         : ''
     const directQuestionUrl = directQuestionMessage && phone
         ? `https://wa.me/${phone}?text=${encodeURIComponent(directQuestionMessage)}`
@@ -304,18 +304,14 @@ export default function Catalog({ whatsappNumber, costumes: catalogCostumes, fin
             const result = await response.json() as RequestResult
             setInquiryResult(result.message)
             if (!response.ok || !result.success || !phone) return
-            const message = [
+            const message = formatWhatsAppMessage([
                 isAvailabilityAlert ? 'Hola, dejé mis datos para que me avisen si vuelve a estar disponible:' : 'Hola, quisiera consultar el alquiler:',
-                `Nombre: ${customerName.trim()}`,
-                `Teléfono: ${customerPhone.trim()}`,
-                customerEmail.trim() ? `Email: ${customerEmail.trim()}` : '',
-                `Disfraz: ${selectedCostume.name}`,
-                `Talle: ${selectedVariantSize}`,
-                `Desde: ${formatDate(pickupDate)}`,
-                `Hasta: ${formatDate(returnDate)}`,
+                [`Nombre: ${customerName.trim()}`, `Teléfono: ${customerPhone.trim()}`, customerEmail.trim() ? `Email: ${customerEmail.trim()}` : ''].filter(Boolean).join('\n'),
+                [`Disfraz: ${selectedCostume.name}`, `Talle: ${selectedVariantSize}`].join('\n'),
+                [`Desde: ${formatDate(pickupDate)}`, `Hasta: ${formatDate(returnDate)}`].join('\n'),
                 inquiryNotes.trim() ? `Aclaraciones: ${inquiryNotes.trim()}` : '',
-                '', isAvailabilityAlert ? 'Quedo atento/a por si se libera para esas fechas.' : 'La consulta queda pendiente de confirmación del local.',
-            ].filter(Boolean).join('\n')
+                isAvailabilityAlert ? 'Quedo atento/a por si se libera para esas fechas.' : '',
+            ])
             setInquiryWhatsAppLink(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`)
         } catch {
             setInquiryResult('No se pudo registrar la consulta. Volvé a intentar.')

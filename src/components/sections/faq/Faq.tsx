@@ -35,7 +35,7 @@ export default function Faq({ content }: { content: Pick<HomePageCopy, 'faqEyebr
                                 <h3>
                                     <button className='faqQuestion' type='button' aria-expanded={isOpen}
                                         aria-controls={answerId} onClick={() => toggleQuestion(question)}>
-                                        {question}<span className='faqChevron' aria-hidden='true' />
+                                        <span className='faqQuestionText'>{question}</span><span className='faqChevron' aria-hidden='true' />
                                     </button>
                                 </h3>
                                 <div className='faqAnswer' id={answerId} aria-hidden={!isOpen} inert={!isOpen}>

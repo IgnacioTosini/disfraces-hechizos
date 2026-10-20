@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { ReactNode } from 'react'
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { formatARS } from '@/lib/formatters'
+import { formatWhatsAppMessage } from '@/lib/whatsapp-message'
 import type { StoreCatalogCostume } from '@/lib/store-catalog'
 import './_cart.scss'
 
@@ -226,16 +227,13 @@ export default function CartProvider({ children, whatsappNumber, costumes }: { c
                 const costume = costumes.find(({ id }) => id === item.costumeId)
                 return costume ? `• ${costume.name} — talle ${item.size} — desde ${formatDate(item.pickupDate)} hasta ${formatDate(item.returnDate)} — cantidad ${item.quantity} — ${formatARS(costume.rentalPrice * item.quantity)}` : ''
             }).filter(Boolean)
-            const message = [
+            const message = formatWhatsAppMessage([
                 'Hola, quisiera consultar disponibilidad para un alquiler:',
-                `Nombre: ${customerName.trim()}`,
-                `Teléfono: ${customerPhone.trim()}`,
-                customerEmail.trim() ? `Email: ${customerEmail.trim()}` : '',
-                '', ...lineItems,
-                `Total orientativo: ${formatARS(total)}`,
-                notes.trim() ? `Aclaraciones: ${notes.trim()}` : '',
-                '', 'Entiendo que la disponibilidad y las condiciones se confirman con el local.',
-            ].filter(Boolean).join('\n')
+                [`Nombre: ${customerName.trim()}`, `Teléfono: ${customerPhone.trim()}`, customerEmail.trim() ? `Email: ${customerEmail.trim()}` : ''].filter(Boolean).join('\n'),
+                lineItems.join('\n'),
+                [`Total orientativo: ${formatARS(total)}`, notes.trim() ? `Aclaraciones: ${notes.trim()}` : ''].filter(Boolean).join('\n'),
+                'Entiendo que la disponibilidad y las condiciones se confirman con el local.',
+            ])
             setWhatsappLink(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`)
         } catch {
             setAvailabilityMessage('No se pudo verificar la disponibilidad ahora. Volvé a intentar.')

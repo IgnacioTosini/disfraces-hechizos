@@ -1,3 +1,5 @@
+import { formatWhatsAppMessage } from "./whatsapp-message";
+
 export type RequestStatusForWhatsApp = "PENDING" | "CONTACTED" | "CONFIRMED" | "PICKED_UP" | "RETURNED" | "CANCELLED";
 
 type StatusMessageItem = { costumeName: string; size: string; pickupDate: Date | string; returnDate: Date | string };
@@ -36,12 +38,13 @@ export function buildRequestStatusWhatsAppUrl({
   items: StatusMessageItem[];
 }) {
   const itemLines = items.map((item) => `• ${item.costumeName} · talle ${item.size} · ${formatDate(item.pickupDate)} al ${formatDate(item.returnDate)}`);
-  const message = [
+  const message = formatWhatsAppMessage([
     `Hola ${customerName}, te escribimos de Disfraces Hechizos por tu solicitud #${requestId.slice(-6)}.`,
     statusMessages[status],
-    ...(itemLines.length ? ["Disfraces y fechas:", ...itemLines] : []),
+    itemLines.length ? ["Disfraces y fechas:", ...itemLines].join("\n") : "",
     "Si necesitás hacer algún cambio, respondé este mensaje.",
-  ].join("\n");
+  ]);
 
   return `https://wa.me/${normalizePhoneForWhatsApp(phone)}?text=${encodeURIComponent(message)}`;
 }
+

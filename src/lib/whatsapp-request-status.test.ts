@@ -19,6 +19,8 @@ describe("mensaje de estado por WhatsApp", () => {
     expect(message).toContain("Tu alquiler está confirmado.");
     expect(message).toContain("Astronauta · talle L");
     expect(message).toContain("10 de nov de 2026 al 12 de nov de 2026");
+    expect(message).toContain("#cdefgh.\n\nTu alquiler está confirmado.");
+    expect(message).toContain("Disfraces y fechas:\n• Astronauta · talle L · 10 de nov de 2026 al 12 de nov de 2026\n\nSi necesitás");
   });
 
   it("preserva teléfonos que ya tienen código internacional", () => {

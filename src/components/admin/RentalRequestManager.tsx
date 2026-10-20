@@ -9,6 +9,7 @@ import { usePaginatedItems } from "@/components/ui/pagination/usePaginatedItems"
 import { formatARS } from "@/lib/formatters";
 import { readRentalRequestFormData } from "@/lib/validations/rental-request";
 import { buildRequestStatusWhatsAppUrl } from "@/lib/whatsapp-request-status";
+import { formatWhatsAppMessage } from "@/lib/whatsapp-message";
 import { createRentalRequest, markAvailabilityAlertContacted, markRentalItemsAvailableAgain, updateRentalRequestStatus, type RentalRequestActionResult } from "@/app/admin/solicitudes/actions";
 
 type RequestStatus = "PENDING" | "CONTACTED" | "CONFIRMED" | "PICKED_UP" | "RETURNED" | "CANCELLED";
@@ -66,7 +67,11 @@ export default function RentalRequestManager({ requests, variants, alerts, loadE
   }
 
   function alertWhatsAppUrl(alert: AvailabilityAlertRow) {
-    const text = `Hola ${alert.customerName}, te contactamos por tu aviso de disponibilidad para ${alert.costumeName} talle ${alert.size}, del ${dateFormat.format(alert.fromDate)} al ${dateFormat.format(alert.throughDate)}. Tenemos novedades para vos.`;
+    const text = formatWhatsAppMessage([
+      `Hola ${alert.customerName}, te contactamos por tu aviso de disponibilidad.`,
+      `${alert.costumeName} · talle ${alert.size}\nDel ${dateFormat.format(alert.fromDate)} al ${dateFormat.format(alert.throughDate)}.`,
+      "Tenemos novedades para vos.",
+    ]);
     return `https://wa.me/${alert.customerPhone.replace(/\D/g, "")}?text=${encodeURIComponent(text)}`;
   }
 
