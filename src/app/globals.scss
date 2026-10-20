@@ -1,0 +1,110 @@
+@use "@/styles/variables" as *;
+
+:root {
+  --navbar-height: 4.5rem;
+  --banner-height: 1.75rem;
+}
+
+body {
+  padding-top: 0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: $font-family;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  scroll-padding-top: calc(var(--navbar-height) + 0.75rem);
+  background-color: $primary-color;
+}
+
+@media (max-width: 45rem) {
+  :root {
+    --navbar-height: 7.75rem;
+  }
+}
+
+.admin-layout {
+  display: flex;
+  min-height: 100dvh;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.accountPage {
+  min-height: 80dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.not-found-page {
+  display: grid;
+  min-height: 65dvh;
+  place-items: center;
+  padding: 2rem;
+  text-align: center;
+
+  div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+    max-width: 520px;
+  }
+
+  p {
+    color: $color-text-secondary;
+    font-size: $font-size-medium;
+    line-height: 1.6;
+  }
+
+  h1 {
+    color: $color-text-secondary;
+    font-family: $font-family-display;
+    font-size: 2.25rem;
+    font-weight: 400;
+  }
+
+  span {
+    color: rgba($color-text-tertiary, 0.68);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  a {
+    margin-top: 0.75rem;
+    background: $color-primary-button;
+    color: #faf9f4;
+    border-radius: 6px;
+    &:focus-visible {
+      outline: 2px solid $secondary-color;
+      outline-offset: 4px;
+    }
+    font-size: $font-size-small;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    padding: 0.9rem 1.2rem;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

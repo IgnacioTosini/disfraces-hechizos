@@ -1,0 +1,82 @@
+@use '@/styles/variables' as *;
+
+.adminShell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  color: #21182d;
+  background: #f7f5f9;
+
+  &__sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1.25rem;
+    color: #f9f5ec;
+    background: #241533;
+  }
+
+  &__brand {
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: $font-weight-bold;
+    text-decoration: none;
+  }
+
+  &__brand span {
+    color: $tertiary-color;
+  }
+
+  &__caption {
+    margin: 3rem .75rem .75rem;
+    color: #b8a9c9;
+    font-size: .7rem;
+    font-weight: $font-weight-bold;
+    letter-spacing: .14em;
+  }
+
+  &__nav {
+    position: relative;
+  }
+
+  &__navLinks {
+    display: grid;
+    gap: .35rem;
+  }
+
+  &__navToggle { display: none; }
+
+  &__link {
+    padding: .8rem .75rem;
+    border-radius: .7rem;
+    color: #ded4e8;
+    font-size: .95rem;
+    text-decoration: none;
+  }
+
+  &__link:hover,
+  &__link--active {
+    color: #fff;
+    background: #ffffff18;
+  }
+
+  &__logout {
+    margin-top: auto;
+    padding: .8rem .75rem;
+    border: 1px solid #ffffff35;
+    border-radius: .7rem;
+    color: white;
+    background: transparent;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  &__main {
+    min-width: 0;
+    padding: clamp(1.5rem, 4vw, 3.5rem);
+  }
+}

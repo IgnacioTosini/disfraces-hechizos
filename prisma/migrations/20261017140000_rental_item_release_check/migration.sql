@@ -1,0 +1,2 @@
+ALTER TABLE "RentalItem"
+ADD COLUMN "isAvailableAgain" BOOLEAN NOT NULL DEFAULT false;

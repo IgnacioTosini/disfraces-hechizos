@@ -1,0 +1,439 @@
+@use '@/styles/variables' as *;
+
+.rentalAdmin {
+  max-width: 78rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  &__header h1 {
+    margin: 0;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    letter-spacing: -.04em;
+  }
+
+  &__header p:last-child {
+    margin: .5rem 0 0;
+    color: #736b7a;
+  }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: .9rem;
+    margin-bottom: 1.2rem;
+  }
+
+  &__summary article {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    padding: 1rem 1.2rem;
+    border: 1px solid #e9e2ef;
+    border-radius: .9rem;
+    background: linear-gradient(135deg, #fff 0%, #faf7fc 100%);
+    box-shadow: 0 .35rem 1.1rem #24153108;
+  }
+
+  &__summary article::before {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: .2rem;
+    background: #f8cf26;
+    content: "";
+  }
+
+  &__summary span {
+    color: #746c7d;
+    font-size: .85rem;
+  }
+
+  &__summary strong {
+    font-size: 1.5rem;
+  }
+
+  &__panel {
+    overflow: hidden;
+    border: 1px solid #e9e2ef;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 .8rem 2rem #24153108;
+  }
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 1.4rem;
+    border-bottom: 1px solid #eee9f2;
+    background: linear-gradient(110deg, #fff 0%, #fbf8fd 100%);
+  }
+
+  &__toolbar h2 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+
+  &__toolbar p {
+    margin: .25rem 0 0;
+    color: #928a99;
+    font-size: .8rem;
+  }
+
+  &__list {
+    display: grid;
+    gap: .55rem;
+    padding: .75rem;
+    background: #fbf9fc;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 9rem 10rem;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.1rem 1.1rem;
+    border: 1px solid #eee8f2;
+    border-radius: .9rem;
+    background: #fff;
+    box-shadow: 0 .2rem .65rem #24153105;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
+
+  &__row:hover {
+    border-color: #ded0e9;
+    box-shadow: 0 .5rem 1.2rem #2415310d;
+  }
+
+  &__main {
+    display: grid;
+    gap: .7rem;
+    min-width: 0;
+  }
+
+  &__person {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: .25rem .8rem;
+  }
+
+  &__person h3 {
+    margin: 0;
+    font-size: .95rem;
+  }
+
+  &__person a {
+    color: #746c7d;
+    font-size: .76rem;
+    text-decoration: none;
+  }
+
+  &__person a:hover {
+    color: $color-secondary-button;
+    text-decoration: underline;
+  }
+
+  &__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+  }
+
+  &__items span {
+    display: grid;
+    gap: .2rem;
+    padding: .4rem .6rem;
+    border-radius: .65rem;
+    color: #51465d;
+    background: #f3edf7;
+    font-size: .72rem;
+  }
+
+  &__items small {
+    color: #81788a;
+    font-size: .66rem;
+  }
+
+  &__dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .25rem .5rem;
+  }
+
+  &__dates span,
+  &__status>span {
+    color: #8b8292;
+    font-size: .68rem;
+  }
+
+  &__dates strong {
+    font-size: .75rem;
+    white-space: nowrap;
+  }
+
+  &__status {
+    display: grid;
+    gap: .35rem;
+  }
+
+  &__status select {
+    width: 100%;
+    min-height: 2.4rem;
+    padding: .4rem .55rem;
+    border: 1px solid #e2d9e8;
+    border-radius: .6rem;
+    background: white;
+    font: inherit;
+    font-size: .75rem;
+  }
+
+  &__statusActions {
+    display: grid;
+    gap: .45rem;
+  }
+
+  &__whatsapp {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    min-height: 2.25rem;
+    padding: .4rem .55rem;
+    border: 1px solid #c9ead8;
+    border-radius: .6rem;
+    color: #147548;
+    background: #effaf3;
+    font-size: .7rem;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+
+  &__whatsapp:hover {
+    border-color: #9bd4b4;
+    background: #e2f5e9;
+  }
+
+  &__whatsapp:focus-visible {
+    outline: 2px solid #16844f;
+    outline-offset: 2px;
+  }
+
+  &__whatsapp svg {
+    flex: 0 0 1rem;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &__notes {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: .65rem .8rem;
+    border-left: .2rem solid #e8cf79;
+    border-radius: .3rem;
+    color: #6e6478;
+    background: #fffbef;
+    font-size: .78rem;
+  }
+
+  &__inspection {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .8rem .9rem;
+    border: 1px solid #efd58a;
+    border-radius: .7rem;
+    background: #fff9e7;
+  }
+
+  &__inspection p {
+    margin: 0;
+    color: #73540b;
+    font-size: .76rem;
+    line-height: 1.5;
+  }
+
+  &__inspection button {
+    flex: 0 0 auto;
+    min-height: 2.4rem;
+    padding: .55rem .8rem;
+    border: 0;
+    border-radius: 999px;
+    color: white;
+    background: $color-secondary-button;
+    font: inherit;
+    font-size: .72rem;
+    font-weight: $font-weight-bold;
+    cursor: pointer;
+  }
+
+  &__inspection button:disabled {
+    opacity: .6;
+    cursor: wait;
+  }
+}
+
+.rentalEditor__backdrop {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  background: #1c122b9c;
+  backdrop-filter: blur(4px);
+}
+
+.rentalEditor {
+  width: min(100%, 48rem);
+  max-height: min(94vh, 56rem);
+  max-height: min(94dvh, 56rem);
+  overflow-y: auto;
+  padding: 1.5rem;
+  border: 1px solid #ece5f0;
+  border-radius: 1.2rem;
+  background: linear-gradient(155deg, #fffefa 0%, #fbf8fd 100%);
+  box-shadow: 0 2rem 6rem #170b2760;
+}
+
+.rentalEditor>header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.rentalEditor>header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: -.025em;
+}
+
+.rentalEditor>header button {
+  width: 2.3rem;
+  height: 2.3rem;
+  border: 1px solid #e8e0ed;
+  border-radius: 50%;
+  color: #5d5267;
+  background: white;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.rentalEditor__intro {
+  margin: .55rem 0 1.1rem;
+  color: #81798c;
+  font-size: .85rem;
+  line-height: 1.5;
+}
+
+.rentalEditor form {
+  display: grid;
+  gap: .9rem;
+}
+
+.rentalEditor__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+}
+
+.rentalEditor__grid .categoryEditor__field:first-child {
+  grid-column: 1 / -1;
+}
+
+.rentalEditor__items {
+  display: grid;
+  gap: .6rem;
+  padding: .95rem;
+  border: 1px solid #e9e0ee;
+  border-radius: .9rem;
+  background: #fff;
+  box-shadow: 0 .3rem .9rem #24153106;
+}
+
+.rentalEditor__items>div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .7rem;
+}
+
+.rentalEditor__items h3 {
+  margin: 0;
+  font-size: .9rem;
+}
+
+.rentalEditor__line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6rem auto;
+  align-items: end;
+  gap: .6rem;
+}
+
+.rentalEditor__line select,
+.rentalEditor__line input {
+  width: 100%;
+  min-height: 2.6rem;
+  padding: .55rem .65rem;
+  border: 1px solid #e2d9e8;
+  border-radius: .6rem;
+  background: white;
+  font: inherit;
+  font-size: .82rem;
+}
+
+.rentalEditor__line select:focus,
+.rentalEditor__line input:focus {
+  border-color: #9a72bb;
+  outline: 0;
+  box-shadow: 0 0 0 .2rem #4b1f7e18;
+}
+
+.rentalEditor__line>button {
+  min-height: 2.6rem;
+  border: 0;
+  color: #9c4440;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.rentalEditor__error {
+  margin: 0;
+  color: #b42318;
+  font-size: .76rem;
+}
+
+.rentalEditor__hint {
+  margin: 0;
+  padding: .7rem .8rem;
+  border-radius: .7rem;
+  color: #73540b;
+  background: #fff6d9;
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
+.rentalEditor form footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: .6rem;
+  padding-top: .35rem;
+}
+
+.rentalEditor form footer button {
+  min-height: 2.75rem;
+}

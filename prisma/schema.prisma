@@ -1,0 +1,201 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==============================
+// ENUMS
+// ==============================
+
+enum Audience {
+  ADULT
+  CHILD
+  UNISEX
+}
+
+enum RentalStatus {
+  PENDING
+  CONTACTED
+  CONFIRMED
+  PICKED_UP
+  RETURNED
+  CANCELLED
+}
+
+// ==============================
+// CATEGORY
+// ==============================
+
+model Category {
+  id            String  @id @default(cuid())
+  name          String
+  slug          String  @unique
+  description   String? @db.Text
+  imageUrl      String?
+  imagePublicId String?
+  isActive      Boolean @default(true)
+  sortOrder     Int     @default(0)
+
+  costumes Costume[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ==============================
+// HOME HERO CONTENT
+// ==============================
+
+model HomeHero {
+  id                String   @id @default("home")
+  eyebrow           String   @default("Disfraces para cada ocasión")
+  titleLineOne      String   @default("Hoy podés")
+  titleLineTwo      String   @default("ser")
+  titleHighlight    String   @default("quien quieras")
+  description       String   @default("Encontrá el disfraz ideal para tu próxima fiesta, evento o celebración. Explorá nuestro catálogo y consultá por tu próximo look.") @db.Text
+  primaryCtaLabel   String   @default("Explorar disfraces")
+  secondaryCtaLabel String   @default("Cómo funciona el alquiler")
+  locationText      String   @default("Local en España 1744 · Mar del Plata")
+  imageUrl          String   @default("/images/hero-disfraces.webp")
+  imagePublicId     String?
+  imageAlt          String   @default("Cuatro personas con disfraces de pirata, reina egipcia, guerrera y astronauta")
+  sections          Json     @default("{}")
+  updatedAt         DateTime @updatedAt
+}
+
+// ==============================
+// COSTUME
+// ==============================
+
+model Costume {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String? @db.Text
+
+  audience    Audience @default(UNISEX)
+  rentalPrice Decimal? @db.Decimal(10, 2)
+
+  isFeatured Boolean @default(false)
+  isActive   Boolean @default(true)
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  images   CostumeImage[]
+  variants CostumeVariant[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId, isActive])
+  @@index([audience, isActive])
+}
+
+// ==============================
+// COSTUME IMAGE
+// ==============================
+
+model CostumeImage {
+  id        String  @id @default(cuid())
+  url       String
+  publicId  String?
+  altText   String?
+  sortOrder Int     @default(0)
+
+  costumeId String
+  costume   Costume @relation(fields: [costumeId], references: [id], onDelete: Cascade)
+
+  @@index([costumeId, sortOrder])
+}
+
+// ==============================
+// COSTUME VARIANT
+// ==============================
+
+model CostumeVariant {
+  id            String  @id @default(cuid())
+  size          String
+  stockQuantity Int     @default(0)
+  isActive      Boolean @default(true)
+
+  costumeId String
+  costume   Costume @relation(fields: [costumeId], references: [id], onDelete: Cascade)
+
+  rentalItems RentalItem[]
+
+  @@unique([costumeId, size])
+  @@index([size])
+}
+
+// ==============================
+// CUSTOMER
+// ==============================
+
+model Customer {
+  id    String  @id @default(cuid())
+  name  String
+  phone String
+  email String?
+
+  rentalRequests RentalRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([phone])
+}
+
+// ==============================
+// RENTAL REQUEST
+// ==============================
+
+model RentalRequest {
+  id String @id @default(cuid())
+
+  pickupDate DateTime @db.Date
+  returnDate DateTime @db.Date
+
+  status RentalStatus @default(PENDING)
+  notes  String?      @db.Text
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+
+  items RentalItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, pickupDate])
+  @@index([customerId, createdAt])
+}
+
+// ==============================
+// RENTAL ITEM
+// ==============================
+
+model RentalItem {
+  id String @id @default(cuid())
+
+  costumeName      String
+  size             String
+  quantity         Int      @default(1)
+  unitPrice        Decimal? @db.Decimal(10, 2)
+  pickupDate       DateTime @db.Date
+  returnDate       DateTime @db.Date
+  isAvailableAgain Boolean  @default(false)
+
+  rentalRequestId String
+  rentalRequest   RentalRequest @relation(fields: [rentalRequestId], references: [id], onDelete: Cascade)
+
+  variantId String
+  variant   CostumeVariant @relation(fields: [variantId], references: [id], onDelete: Restrict)
+
+  @@index([rentalRequestId])
+  @@index([variantId])
+}

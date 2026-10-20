@@ -1,0 +1,61 @@
+$primary-color: #FCFAF4;
+$secondary-color: #302044;
+$tertiary-color: #FFD631;
+
+$color-primary-button: #F8CC2F;
+$color-secondary-button: #4B1F7E;
+
+$border-color: #d1d1d1;
+
+$color-hover-primary: #FFD631;
+$color-hover-secondary: #959ba3;
+
+// Color text
+$color-text: #F9F5EC;
+$color-text-secondary: #F8CC2F;
+$color-text-tertiary: #1B1426;
+$color-text-quaternary: #4B1F7E;
+
+$font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+$font-family-display: var(--font-cormorant-garamond), Georgia, serif;
+
+$font-size-xsmall: 0.8125rem;
+$font-size-small: 0.75rem;
+$font-size-normal: 0.875rem;
+$font-size-medium: 1rem;
+$font-size-medium-large: 1.125rem;
+$font-size-large: 1.5rem;
+$font-size-xlarge: 2rem;
+$font-size-xxlarge: 2.25rem;
+$font-size-xxxlarge: 3.75rem;
+$font-size-xxxxlarge: 4.5rem;
+$font-size-mega: 10rem;
+
+$font-weight-thin: 100;
+$font-weight-extra-light: 200;
+$font-weight-light: 300;
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$font-weight-extra-bold: 800;
+
+$color-error: #ff4d4f;
+$color-success: #52c41a;
+
+$color-status-confirmed: #1f59b6;
+$color-status-confirmed-bg: #e8f0ff;
+$color-status-preparing: #9a6500;
+$color-status-preparing-bg: #fff5dc;
+$color-status-ready: #008f4c;
+$color-status-ready-bg: #e9f9ef;
+
+$color-instagram: #e1306c;
+$color-whatsapp: #25d366;
+$color-tiktok: #000000;
+
+// Compatibility aliases
+$quaternary-color: #13213370;
+$quinary-color: #0a1a2f;
+$color-button: $color-primary-button;
+$color-button-secondary: $color-secondary-button;

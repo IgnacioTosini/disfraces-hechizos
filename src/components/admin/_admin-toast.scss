@@ -1,0 +1,66 @@
+@use '@/styles/variables' as *;
+
+.adminToast {
+  position: fixed;
+  z-index: 3000;
+  top: 1.25rem;
+  right: 1.25rem;
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .75rem;
+  width: min(27rem, calc(100vw - 2rem));
+  min-height: 4.25rem;
+  overflow: hidden;
+  padding: .75rem 1rem;
+  border: 1px solid rgba($color-secondary-button, .2);
+  border-radius: 1rem;
+  background: #fffdf8;
+  box-shadow: 0 1rem 2.5rem rgba(#1d0d2b, .2);
+  color: $color-text-tertiary;
+  animation: adminToastIn 200ms ease-out;
+
+  &__icon {
+    display: grid;
+    width: 2.125rem;
+    height: 2.125rem;
+    place-items: center;
+    border-radius: 50%;
+    background: #fbd32f;
+    color: #27143a;
+    font-weight: $font-weight-bold;
+  }
+
+  p { margin: 0; font-size: $font-size-small; line-height: 1.45; }
+
+  button {
+    display: grid;
+    width: 1.75rem;
+    height: 1.75rem;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #706879;
+    font: inherit;
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+
+  button:hover { background: #f3edf6; }
+  &--error { border-color: #f0c8c8; }
+  &--error .adminToast__icon { background: #fde7e7; color: #b42332; }
+  &__progress { position: absolute; right: 0; bottom: 0; left: 0; height: .1875rem; background: $color-secondary-button; transform-origin: left; animation: adminToastProgress 4.2s linear forwards; }
+  &--error .adminToast__progress { background: #c03942; }
+}
+
+@keyframes adminToastIn { from { opacity: 0; transform: translateY(-.4rem); } to { opacity: 1; transform: translateY(0); } }
+@keyframes adminToastProgress { to { transform: scaleX(0); } }
+
+@media (max-width: 45rem) {
+  .adminToast { top: .75rem; right: .75rem; width: calc(100vw - 1.5rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .adminToast, .adminToast__progress { animation: none; }
+}
