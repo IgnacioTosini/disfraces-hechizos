@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import AdminToast from "@/components/admin/AdminToast";
+import ImageCropper from "@/components/admin/ImageCropper";
 import { validateImageFile } from "@/lib/image-upload-validation";
 import { DEFAULT_HOME_PAGE_COPY, type HomeHeroContent, type HomePageCopy } from "@/lib/home-hero";
 import type { StoreCatalogCostume } from "@/lib/store-catalog";
@@ -32,6 +33,7 @@ export default function HomeHeroManager({ initialContent, costumes }: { initialC
     imageAlt: initialContent.imageAlt,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [cropSelection, setCropSelection] = useState<{ file: File; sourceUrl: string } | null>(null);
   const [pageCopy, setPageCopy] = useState<HomePageCopy>(initialContent.sections ?? DEFAULT_HOME_PAGE_COPY);
   const [showFullPreview, setShowFullPreview] = useState(false);
   const [localPreview, setLocalPreview] = useState("");
@@ -44,6 +46,8 @@ export default function HomeHeroManager({ initialContent, costumes }: { initialC
     return () => { if (localPreview) URL.revokeObjectURL(localPreview); };
   }, [localPreview]);
 
+  useEffect(() => () => { if (cropSelection?.sourceUrl) URL.revokeObjectURL(cropSelection.sourceUrl); }, [cropSelection?.sourceUrl]);
+
   function updateField(field: HeroFieldName, value: string) {
     setValues((current) => ({ ...current, [field]: value }));
     setFieldErrors((current) => ({ ...current, [field]: "" }));
@@ -51,6 +55,7 @@ export default function HomeHeroManager({ initialContent, costumes }: { initialC
 
   function selectImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
     const imageError = validateImageFile(file);
     if (imageError) {
@@ -59,9 +64,14 @@ export default function HomeHeroManager({ initialContent, costumes }: { initialC
       event.target.value = "";
       return;
     }
+    setCropSelection({ file, sourceUrl: URL.createObjectURL(file) });
+    setNotice("");
+  }
+
+  function applyImageCrop(file: File) {
     setImageFile(file);
     setLocalPreview(URL.createObjectURL(file));
-    setNotice("");
+    setCropSelection(null);
   }
 
   function restoreCurrentImage() {
@@ -156,6 +166,7 @@ export default function HomeHeroManager({ initialContent, costumes }: { initialC
     return <section className="heroEditor heroEditor--fullPreview">
       <div className="homePreviewToolbar"><div><span>VISTA PREVIA</span><strong>Inicio completo</strong><small>Revisá los cambios antes de guardarlos.</small></div><div><button type="button" onClick={() => setShowFullPreview(false)}>← Volver a editar</button><button type="button" disabled={isSaving} onClick={() => document.getElementById('homeContentSave')?.click()}>{isSaving ? 'Guardando…' : 'Guardar cambios'}</button></div></div>
       <HomePagePreview content={{ ...initialContent, ...values, sections: pageCopy }} imageSrc={localPreview || values.imageUrl} costumes={costumes} />
+      {cropSelection && <ImageCropper key={cropSelection.sourceUrl} file={cropSelection.file} sourceUrl={cropSelection.sourceUrl} aspectRatio={4 / 3} title="Ajustar imagen del Hero" onCancel={() => setCropSelection(null)} onApply={applyImageCrop} />}
       <form className="homePreviewSubmit" onSubmit={submit}>
         {Object.entries(values).map(([key, value]) => <input key={key} type="hidden" name={key} value={value ?? ''} />)}
         <input type="hidden" name="sections" value={JSON.stringify(pageCopy)} />
@@ -199,7 +210,7 @@ export default function HomeHeroManager({ initialContent, costumes }: { initialC
             </label>
             {imageFile && <button className="heroEditor__restore" type="button" onClick={restoreCurrentImage} disabled={isSaving}>Descartar</button>}
           </div>
-          {imageFile && <p className="heroEditor__uploadHint">La vista previa es local. Se subirá a Cloudinary al guardar.</p>}
+          {imageFile && <p className="heroEditor__uploadHint">Imagen ajustada. Se subirá a Cloudinary al guardar.</p>}
           {fieldErrors.imageUrl && <p className="heroEditor__fieldError" role="alert">{fieldErrors.imageUrl}</p>}
         </aside>
 
@@ -266,6 +277,7 @@ export default function HomeHeroManager({ initialContent, costumes }: { initialC
           </footer>
         </div>
       </form>
+      {cropSelection && <ImageCropper key={cropSelection.sourceUrl} file={cropSelection.file} sourceUrl={cropSelection.sourceUrl} aspectRatio={4 / 3} title="Ajustar imagen del Hero" onCancel={() => setCropSelection(null)} onApply={applyImageCrop} />}
     </section>
   );
 }

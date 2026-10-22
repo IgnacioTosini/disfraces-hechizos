@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import AdminToast from "@/components/admin/AdminToast";
+import ImageCropper from "@/components/admin/ImageCropper";
 import { saveOccasionAccess, type OccasionAccessActionResult } from "@/app/admin/ocasiones/actions";
 import { validateImageFile } from "@/lib/image-upload-validation";
 import type { CostumeFinderOption } from "@/lib/costume-finder-settings";
@@ -18,12 +19,14 @@ export default function OccasionAccessManager({ initialCards, options }: { initi
   const [cards, setCards] = useState(initialCards);
   const [files, setFiles] = useState<Partial<Record<OccasionId, File>>>({});
   const [previews, setPreviews] = useState<Partial<Record<OccasionId, string>>>({});
+  const [cropSelection, setCropSelection] = useState<{ file: File; id: OccasionId; sourceUrl: string } | null>(null);
   const previewUrls = useRef<string[]>([]);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
+  useEffect(() => () => { if (cropSelection?.sourceUrl) URL.revokeObjectURL(cropSelection.sourceUrl); }, [cropSelection?.sourceUrl]);
 
   function updateCard(id: OccasionId, update: Partial<OccasionAccessCard>) {
     setCards((current) => current.map((card) => card.id === id ? { ...card, ...update } : card));
@@ -36,6 +39,7 @@ export default function OccasionAccessManager({ initialCards, options }: { initi
 
   function selectImage(event: ChangeEvent<HTMLInputElement>, id: OccasionId) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
     const error = validateImageFile(file);
     if (error) {
@@ -44,11 +48,17 @@ export default function OccasionAccessManager({ initialCards, options }: { initi
       event.target.value = "";
       return;
     }
+    setCropSelection({ file, id, sourceUrl: URL.createObjectURL(file) });
+    setMessage("");
+  }
+
+  function applyImageCrop(file: File) {
+    if (!cropSelection) return;
     const url = URL.createObjectURL(file);
     previewUrls.current.push(url);
-    setFiles((current) => ({ ...current, [id]: file }));
-    setPreviews((current) => ({ ...current, [id]: url }));
-    setMessage("");
+    setFiles((current) => ({ ...current, [cropSelection.id]: file }));
+    setPreviews((current) => ({ ...current, [cropSelection.id]: url }));
+    setCropSelection(null);
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -125,7 +135,8 @@ export default function OccasionAccessManager({ initialCards, options }: { initi
         </div>
         <fieldset className="occasionAdmin__tags"><legend>Etiquetas que mostrarán disfraces</legend><div>{options.map((option) => <label key={option.id}><input type="checkbox" checked={card.tags.includes(option.id)} onChange={() => toggleTag(card, option.id)} /><span>{option.label}</span></label>)}</div></fieldset>
       </article>)}
-      <footer className="occasionAdmin__footer"><p>Las imágenes seleccionadas se previsualizan y se suben a Cloudinary al guardar.</p><button className="categoryAdmin__primary" type="submit" disabled={isSaving || !options.length}>{isSaving ? "Guardando…" : "Guardar accesos"}</button></footer>
+      <footer className="occasionAdmin__footer"><p>Podés reubicar cada imagen antes de guardarla; se suben a Cloudinary al guardar.</p><button className="categoryAdmin__primary" type="submit" disabled={isSaving || !options.length}>{isSaving ? "Guardando…" : "Guardar accesos"}</button></footer>
     </form>
+    {cropSelection && <ImageCropper key={cropSelection.sourceUrl} file={cropSelection.file} sourceUrl={cropSelection.sourceUrl} aspectRatio={2} title="Ajustar imagen de ocasión" onCancel={() => setCropSelection(null)} onApply={applyImageCrop} />}
   </section>;
 }

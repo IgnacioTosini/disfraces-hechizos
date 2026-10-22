@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState, useTransition, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import AdminToast from "@/components/admin/AdminToast";
+import ImageCropper from "@/components/admin/ImageCropper";
 import AdminSearch from "@/components/admin/AdminSearch";
 import Pagination from "@/components/ui/pagination/Pagination";
 import { usePaginatedItems } from "@/components/ui/pagination/usePaginatedItems";
@@ -44,6 +45,7 @@ export type AdminCostume = {
 };
 
 type PendingImage = { file: File; previewUrl: string; altText: string };
+type CropImage = { id: string; file: File; sourceUrl: string };
 type EditorCostume = Omit<AdminCostume, "category">;
 
 const audienceLabels: Record<Audience, string> = { ADULT: "Adultos", CHILD: "Infantiles", UNISEX: "Unisex" };
@@ -152,10 +154,11 @@ function CostumeEditor({ costume, categories, finderOptions, busy, onClose, onSa
   const [name, setName] = useState(costume?.name ?? "");
   const [slug, setSlug] = useState(costume?.slug ?? "");
   const [assistantTags, setAssistantTags] = useState<string[]>(costume?.assistantTags ?? []);
-  const [slugTouched, setSlugTouched] = useState(Boolean(costume));
+  const [slugTouched, setSlugTouched] = useState(false);
   const [variants, setVariants] = useState<CostumeVariant[]>(costume?.variants.map(({ id, size, stockQuantity, isActive, rentalItemsCount }) => ({ id, size, stockQuantity, isActive, rentalItemsCount })) ?? []);
   const [existingImages, setExistingImages] = useState<CostumeImage[]>(costume?.images ?? []);
   const [pendingImages, setPendingImages] = useState<PendingImage[]>([]);
+  const [cropQueue, setCropQueue] = useState<CropImage[]>([]);
   const [formError, setFormError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [imageError, setImageError] = useState("");
@@ -163,8 +166,12 @@ function CostumeEditor({ costume, categories, finderOptions, busy, onClose, onSa
   const [saving, startTransition] = useTransition();
   const pending = busy || saving;
   const previewUrls = useRef(new Set<string>());
+  const cropSourceUrls = useRef(new Set<string>());
 
-  useEffect(() => () => previewUrls.current.forEach((url) => URL.revokeObjectURL(url)), []);
+  useEffect(() => () => {
+    previewUrls.current.forEach((url) => URL.revokeObjectURL(url));
+    cropSourceUrls.current.forEach((url) => URL.revokeObjectURL(url));
+  }, []);
 
   useEffect(() => {
     if (!expandedImage) return;
@@ -176,20 +183,40 @@ function CostumeEditor({ costume, categories, finderOptions, busy, onClose, onSa
   function selectImages(event: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(event.target.files ?? []);
     event.target.value = "";
-    const capacity = maximumImages - existingImages.length - pendingImages.length;
+    const capacity = maximumImages - existingImages.length - pendingImages.length - cropQueue.length;
     const capacityWarning = selected.length > capacity ? `Podés agregar ${Math.max(0, capacity)} imagen${capacity === 1 ? "" : "es"} más.` : "";
-    const accepted: PendingImage[] = [];
+    const accepted: CropImage[] = [];
     for (const file of selected.slice(0, Math.max(0, capacity))) {
       const error = validateImageFile(file);
       if (error) { setImageError(error); continue; }
-      const previewUrl = URL.createObjectURL(file);
-      previewUrls.current.add(previewUrl);
-      accepted.push({ file, previewUrl, altText: file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ") });
+      const sourceUrl = URL.createObjectURL(file);
+      cropSourceUrls.current.add(sourceUrl);
+      accepted.push({ id: crypto.randomUUID(), file, sourceUrl });
     }
     if (accepted.length) {
-      setPendingImages((current) => [...current, ...accepted]);
+      setCropQueue((current) => [...current, ...accepted]);
       setImageError(capacityWarning);
     } else if (capacityWarning) setImageError(capacityWarning);
+  }
+
+  function applyImageCrop(file: File) {
+    const sourceImage = cropQueue[0];
+    if (!sourceImage) return;
+    URL.revokeObjectURL(sourceImage.sourceUrl);
+    cropSourceUrls.current.delete(sourceImage.sourceUrl);
+    const previewUrl = URL.createObjectURL(file);
+    previewUrls.current.add(previewUrl);
+    setPendingImages((current) => [...current, { file, previewUrl, altText: sourceImage.file.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ") }]);
+    setCropQueue((current) => current.slice(1));
+  }
+
+  function skipImageCrop() {
+    const sourceImage = cropQueue[0];
+    if (sourceImage) {
+      URL.revokeObjectURL(sourceImage.sourceUrl);
+      cropSourceUrls.current.delete(sourceImage.sourceUrl);
+    }
+    setCropQueue((current) => current.slice(1));
   }
 
   function removePendingImage(previewUrl: string) {
@@ -290,7 +317,7 @@ function CostumeEditor({ costume, categories, finderOptions, busy, onClose, onSa
             </div>
           </section>
 
-          <section className="costumeEditor__section costumeEditor__section--photos"><div className="costumeEditor__sectionTitle"><span>03</span><div><h3>Fotos</h3><p>Hasta {maximumImages} imágenes. Se suben a Cloudinary al guardar.</p></div><label className="costumeEditor__add costumeEditor__fileAdd">＋ Agregar fotos<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={selectImages} disabled={pending || existingImages.length + pendingImages.length >= maximumImages} /></label></div>
+          <section className="costumeEditor__section costumeEditor__section--photos"><div className="costumeEditor__sectionTitle"><span>03</span><div><h3>Fotos</h3><p>Hasta {maximumImages} imágenes. Ajustalas antes de subirlas a Cloudinary.</p></div><label className="costumeEditor__add costumeEditor__fileAdd">＋ Agregar fotos<input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={selectImages} disabled={pending || existingImages.length + pendingImages.length + cropQueue.length >= maximumImages} /></label></div>
             <div className="costumeEditor__imageGrid">
               {existingImages.map((image, index) => <div className="costumeEditor__imageCard" key={`${image.publicId ?? image.url}-${index}`}><button type="button" className="costumeEditor__imagePhotoButton" onClick={() => setExpandedImage({ url: image.url, alt: image.altText || `Foto ${index + 1} de ${name}` })} aria-label={`Ampliar foto ${index + 1} de ${name}`}><span className="costumeEditor__imagePhoto" style={{ backgroundImage: `url(${JSON.stringify(image.url)})` }} /><small>Ver en grande</small></button><label>Texto alternativo<input maxLength={180} value={image.altText ?? ""} onChange={(event) => setExistingImages((current) => current.map((item, itemIndex) => itemIndex === index ? { ...item, altText: event.target.value } : item))} placeholder="Describí la imagen" /></label><button type="button" onClick={() => setExistingImages((current) => current.filter((_, itemIndex) => itemIndex !== index))}>Quitar foto</button></div>)}
               {pendingImages.map((image, index) => <div className="costumeEditor__imageCard" key={image.previewUrl}><button type="button" className="costumeEditor__imagePhotoButton" onClick={() => setExpandedImage({ url: image.previewUrl, alt: image.altText || `Vista previa ${index + 1} de ${name}` })} aria-label={`Ampliar vista previa ${index + 1} de ${name}`}><span className="costumeEditor__imagePhoto" style={{ backgroundImage: `url(${JSON.stringify(image.previewUrl)})` }} /><small>Ver en grande</small></button><label>Texto alternativo<input maxLength={180} value={image.altText} onChange={(event) => setPendingImages((current) => current.map((item) => item.previewUrl === image.previewUrl ? { ...item, altText: event.target.value } : item))} placeholder="Describí la imagen" /></label><small>Vista previa local · se sube al guardar</small><button type="button" onClick={() => removePendingImage(image.previewUrl)}>Quitar foto</button></div>)}
@@ -310,6 +337,7 @@ function CostumeEditor({ costume, categories, finderOptions, busy, onClose, onSa
           <p>{expandedImage.alt}</p>
         </section>
       </div>}
+      {cropQueue[0] && <ImageCropper key={cropQueue[0].id} file={cropQueue[0].file} sourceUrl={cropQueue[0].sourceUrl} aspectRatio={4 / 5} title="Ajustar foto del disfraz" onCancel={skipImageCrop} onApply={applyImageCrop} />}
     </div>
   );
 }

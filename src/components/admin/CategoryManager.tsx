@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useTransition, type ChangeEvent, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import AdminToast from "@/components/admin/AdminToast";
+import ImageCropper from "@/components/admin/ImageCropper";
 import AdminSearch from "@/components/admin/AdminSearch";
 import Pagination from "@/components/ui/pagination/Pagination";
 import { usePaginatedItems } from "@/components/ui/pagination/usePaginatedItems";
@@ -160,6 +161,7 @@ function CategoryEditor({ category, busy, onClose, onSave }: {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [localPreviewUrl, setLocalPreviewUrl] = useState("");
   const [imageError, setImageError] = useState("");
+  const [cropSelection, setCropSelection] = useState<{ file: File; sourceUrl: string } | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState("");
   const [saving, startTransition] = useTransition();
@@ -171,8 +173,11 @@ function CategoryEditor({ category, busy, onClose, onSave }: {
     };
   }, [localPreviewUrl]);
 
+  useEffect(() => () => { if (cropSelection?.sourceUrl) URL.revokeObjectURL(cropSelection.sourceUrl); }, [cropSelection?.sourceUrl]);
+
   function selectImage(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
     const validationError = validateImageFile(file);
     if (validationError) {
@@ -181,8 +186,13 @@ function CategoryEditor({ category, busy, onClose, onSave }: {
       return;
     }
     setImageError("");
+    setCropSelection({ file, sourceUrl: URL.createObjectURL(file) });
+  }
+
+  function applyImageCrop(file: File) {
     setImageFile(file);
     setLocalPreviewUrl(URL.createObjectURL(file));
+    setCropSelection(null);
   }
 
   function clearImage() {
@@ -263,7 +273,7 @@ function CategoryEditor({ category, busy, onClose, onSave }: {
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={selectImage} disabled={pending} />
                 </label>
                 {(imageUrl || imageFile) && <button className="categoryEditor__removeImage" type="button" onClick={clearImage} disabled={pending}>Quitar imagen</button>}
-                <small>{imageFile ? "Esta vista previa se subirá a Cloudinary al guardar." : "JPG, PNG o WebP · máximo 10 MB"}</small>
+                <small>{imageFile ? "La imagen ajustada se subirá a Cloudinary al guardar." : "JPG, PNG o WebP · máximo 10 MB · podés reubicarla antes de subirla"}</small>
                 {imageError && <small className="categoryEditor__imageError" role="alert">{imageError}</small>}
                 {fieldErrors.imageUrl && <small className="categoryEditor__imageError">{fieldErrors.imageUrl}</small>}
               </div>
@@ -283,6 +293,7 @@ function CategoryEditor({ category, busy, onClose, onSave }: {
           </footer>
         </form>
       </section>
+      {cropSelection && <ImageCropper key={cropSelection.sourceUrl} file={cropSelection.file} sourceUrl={cropSelection.sourceUrl} aspectRatio={1} title="Ajustar imagen de categoría" onCancel={() => setCropSelection(null)} onApply={applyImageCrop} />}
     </div>
   );
 }
